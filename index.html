@@ -1,0 +1,147 @@
+<html>
+<header>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.8.0/mapbox-gl.js'></script>
+    <script src='https://api.mapbox.com/mapbox.js/plugins/turf/v3.0.11/turf.min.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v1.8.0/mapbox-gl.css' rel='stylesheet' />
+    <link href="./index.css" rel="stylesheet" />
+</header>
+
+<body>
+    <div id='map'></div>
+    <script src="./captitals.js"></script>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiYW5obmd1eWVuNjI4MSIsImEiOiJjazdka3VsankxMTZ4M2dyd2NrMmRxdzVwIn0.GX9EDHs7fkf2DqEOaYBMSw';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            zoom: 1
+        });
+
+        var libraries = {
+            type: 'FeatureCollection',
+            features: [
+                { type: 'Feature', properties: { Name: 'Village Branch', Address: '2185 Versailles Rd' }, geometry: { type: 'Point', coordinates: [-84.548369, 38.047876] } },
+                { type: 'Feature', properties: { Name: 'Northside Branch', ADDRESS: '1733 Russell Cave Rd' }, geometry: { type: 'Point', coordinates: [-84.47135, 38.079734] } },
+                { type: 'Feature', properties: { Name: 'Central Library', ADDRESS: '140 E Main St' }, geometry: { type: 'Point', coordinates: [-84.496894, 38.045459] } },
+                { type: 'Feature', properties: { Name: 'Beaumont Branch', Address: '3080 Fieldstone Way' }, geometry: { type: 'Point', coordinates: [-84.557948, 38.012502] } },
+                { type: 'Feature', properties: { Name: 'Tates Creek Branch', Address: '3628 Walden Dr' }, geometry: { type: 'Point', coordinates: [-84.498679, 37.979598] } },
+                { type: 'Feature', properties: { Name: 'Eagle Creek Branch', Address: '101 N Eagle Creek Dr' }, geometry: { type: 'Point', coordinates: [-84.442219, 37.999437] } }
+            ]
+        };
+
+        const captitalDots = {
+            type: 'FeatureCollection',
+            features: captitals.map(({ CapitalName: name, CapitalLongitude: longitude, CapitalLatitude: latitude, CountryName }) => {
+
+                if (Math.abs(longitude) > 180 || Math.abs(latitude) > 90) {
+                    console.log(name, longitude, latitude)
+                }
+                return {
+                    type: 'Feature',
+                    properties: {
+                        Name: name,
+                        Description: `Capital of ${CountryName}`
+                    },
+                    geometry: {
+                        type: 'Point',
+                        coordinates: [longitude, latitude]
+                    }
+                }
+            })
+        }
+
+        const helsinki = {
+            "name": "Helsinki",
+            "CapitalLatitude": 60.166666666666664,
+            "CapitalLongitude": 24.933333,
+        }
+
+
+        const routes = {
+            'type': 'FeatureCollection',
+            'features': captitals.filter(({ CapitalName }) => CapitalName !== helsinki.name)
+                .map(({ CapitalName: name, CapitalLongitude: longitude, CapitalLatitude: latitude }) => {
+                    return {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': [[helsinki.CapitalLongitude, helsinki.CapitalLatitude], [Number(longitude), Number(latitude)]]
+                        }
+                    }
+                })
+        }
+
+        const lineDistances = routes.features.map(route => {
+
+            var lineDistance = turf.lineDistance(route, 'kilometers');
+            var steps = 500;
+            const arc = []
+            // Draw an arc between the `origin` & `destination` of the two points
+            for (var i = 0; i < lineDistance; i += lineDistance / steps) {
+                var segment = turf.along(route, i, 'kilometers');
+                arc.push(segment.geometry.coordinates);
+            }
+
+
+
+            const prev = route.geometry.coordinates
+            route.geometry.coordinates = arc
+            console.log(arc[0], prev)
+        })
+
+        console.log('router', routes)
+
+
+        map.on('load', function () {
+            map.addLayer({
+                id: 'capitals',
+                type: 'symbol',
+                source: {
+                    type: 'geojson',
+                    data: captitalDots
+                },
+                layout: {
+                    'icon-image': 'airport-11',
+                    'icon-allow-overlap': true
+                },
+                paint: {}
+            });
+
+            map.addSource('route', {
+                'type': 'geojson',
+                'data': routes
+            });
+
+            map.addLayer({
+                'id': 'route',
+                'source': 'route',
+                'type': 'line',
+                'paint': {
+                    'line-width': 0.1,
+                    'line-color': '#007cbf'
+                }
+            });
+
+            var popup = new mapboxgl.Popup();
+
+            map.on('mousemove', function (e) {
+                var features = map.queryRenderedFeatures(e.point, { layers: ['capitals'] });
+                if (!features.length) {
+                    popup.remove();
+                    return;
+                }
+                var feature = features[0];
+
+                popup.setLngLat(feature.geometry.coordinates)
+                    .setHTML(`<h3>${feature.properties.Name}</h3> <p> ${feature.properties.Description} </p>`)
+                    .addTo(map);
+
+                map.getCanvas().style.cursor = features.length ? 'pointer' : '';
+            });
+        });
+
+        console.log(captitals)
+    </script>
+</body>
+
+</html>
