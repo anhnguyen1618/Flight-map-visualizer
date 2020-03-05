@@ -10,11 +10,7 @@
     <div id='map'></div>
     <script src="./captitals.js"></script>
     <script>
-        const helsinki = {
-            "name": "Helsinki",
-            "CapitalLatitude": 60.166666666666664,
-            "CapitalLongitude": 24.933333,
-        }
+        let originCapital = 'Helsinki';
 
         mapboxgl.accessToken = 'pk.eyJ1IjoiYW5obmd1eWVuNjI4MSIsImEiOiJjazdka3VsankxMTZ4M2dyd2NrMmRxdzVwIn0.GX9EDHs7fkf2DqEOaYBMSw';
         var map = new mapboxgl.Map({
@@ -23,25 +19,9 @@
             zoom: 2
         });
 
-        var libraries = {
-            type: 'FeatureCollection',
-            features: [
-                { type: 'Feature', properties: { Name: 'Village Branch', Address: '2185 Versailles Rd' }, geometry: { type: 'Point', coordinates: [-84.548369, 38.047876] } },
-                { type: 'Feature', properties: { Name: 'Northside Branch', ADDRESS: '1733 Russell Cave Rd' }, geometry: { type: 'Point', coordinates: [-84.47135, 38.079734] } },
-                { type: 'Feature', properties: { Name: 'Central Library', ADDRESS: '140 E Main St' }, geometry: { type: 'Point', coordinates: [-84.496894, 38.045459] } },
-                { type: 'Feature', properties: { Name: 'Beaumont Branch', Address: '3080 Fieldstone Way' }, geometry: { type: 'Point', coordinates: [-84.557948, 38.012502] } },
-                { type: 'Feature', properties: { Name: 'Tates Creek Branch', Address: '3628 Walden Dr' }, geometry: { type: 'Point', coordinates: [-84.498679, 37.979598] } },
-                { type: 'Feature', properties: { Name: 'Eagle Creek Branch', Address: '101 N Eagle Creek Dr' }, geometry: { type: 'Point', coordinates: [-84.442219, 37.999437] } }
-            ]
-        };
-
         const captitalDots = {
             type: 'FeatureCollection',
             features: captitals.map(({ CapitalName: name, CapitalLongitude: longitude, CapitalLatitude: latitude, CountryName }) => {
-
-                if (Math.abs(longitude) > 180 || Math.abs(latitude) > 90) {
-                    console.log(name, longitude, latitude)
-                }
                 return {
                     type: 'Feature',
                     properties: {
@@ -56,26 +36,43 @@
             })
         }
 
+        const mappings = (function buildIndex() {
+            const index = {};
+            for (const capital of captitals) {
+                index[capital.CapitalName] = capital;
+            }
+            return index;
+        })()
 
 
+        function computeRoutes(origin) {
+            const originInfo = mappings[origin]
+            if (!originInfo) {
+                return {
+                    'type': 'FeatureCollection',
+                    'features': []
+                }
+            }
 
-        const routes = {
-            'type': 'FeatureCollection',
-            'features': captitals.filter(({ CapitalName }) => CapitalName !== helsinki.name)
-                .map(({ CapitalName: name, CapitalLongitude: longitude, CapitalLatitude: latitude }, index) => {
-                    return {
-                        'type': 'Feature',
-                        'id': index,
-                        'properties': { origin: name },
-                        'geometry': {
-                            'type': 'LineString',
-                            'coordinates': [[helsinki.CapitalLongitude, helsinki.CapitalLatitude], [Number(longitude), Number(latitude)]]
+            return {
+                'type': 'FeatureCollection',
+                'features': captitals.filter(({ CapitalName }) => CapitalName !== origin)
+                    .map(({ CapitalName: name, CapitalLongitude: longitude, CapitalLatitude: latitude }, index) => {
+                        return {
+                            'type': 'Feature',
+                            'id': index,
+                            'properties': { origin: name },
+                            'geometry': {
+                                'type': 'LineString',
+                                'coordinates': [[Number(originInfo.CapitalLongitude), Number(originInfo.CapitalLatitude)], [Number(longitude), Number(latitude)]]
+                            }
                         }
-                    }
-                })
+                    })
+            }
         }
 
-        const getLineProperties = (distance) => {
+
+        function getLineProperties(distance) {
             const LONG_HAUL = 10000;
             const UPPER_MEDIUM_HAUL = 5000;
             const LOWER_MEDIUM_HAUL = 3000;
@@ -98,24 +95,40 @@
             return { color: '#c41497', lineWidth: 2, distance }
         }
 
-        const lineDistances = routes.features.map(route => {
+        function computeDistancesAndLines(routes) {
+            routes.features.forEach(route => {
 
-            var lineDistance = turf.lineDistance(route, 'kilometers');
-            var steps = 1000;
-            const arc = []
+                var lineDistance = turf.lineDistance(route, 'kilometers');
+                var steps = 1000;
+                const arc = []
 
-            // Draw an arc between the `origin` & `destination` of the two points
-            for (var i = 0; i <= lineDistance; i += lineDistance / steps) {
-                var segment = turf.along(route, i, 'kilometers');
-                arc.push(segment.geometry.coordinates);
+                // Draw an arc between the `origin` & `destination` of the two points
+                for (var i = 0; i <= lineDistance; i += lineDistance / steps) {
+                    var segment = turf.along(route, i, 'kilometers');
+                    arc.push(segment.geometry.coordinates);
+                }
+                route.properties = { ...route.properties, ...getLineProperties(lineDistance) }
+
+                const prev = route.geometry.coordinates
+                route.geometry.coordinates = arc
+            })
+        }
+
+        function displayFlightRoutes(origin) {
+            const routes = computeRoutes(origin);
+            computeDistancesAndLines(routes);
+            return routes;
+        }
+
+        function replaceOrigin(newOrigin) {
+            originCapital = newOrigin;
+            const source = map.getSource('route');
+            if (source) {
+                const e = displayFlightRoutes(originCapital);
+                console.log(e, originCapital)
+                source.setData(e)
             }
-            route.properties = { ...route.properties, ...getLineProperties(lineDistance) }
-
-            const prev = route.geometry.coordinates
-            route.geometry.coordinates = arc
-        })
-
-        console.log('router', routes)
+        }
 
 
         map.on('load', function () {
@@ -135,7 +148,7 @@
 
             map.addSource('route', {
                 'type': 'geojson',
-                'data': routes
+                'data': displayFlightRoutes(originCapital)
             });
 
             map.addLayer({
@@ -186,6 +199,27 @@
                     .addTo(map);
 
                 map.getCanvas().style.cursor = features.length ? 'pointer' : '';
+                console.log(feature)
+
+            });
+
+            map.on('click', 'capitals', function (e) {
+                var features = e.features
+                if (!features.length) {
+                    return;
+                }
+                var feature = features[0];
+
+                map.flyTo({
+                    center: feature.geometry.coordinates, speed: 0.2, easing: function (t) {
+                        return t;
+                    },
+                });
+                /*map.setFeatureState(
+                        { source: 'route', id },
+                        { focused: false }
+                    );*/
+                replaceOrigin(feature.properties.Name)
             });
 
 
@@ -197,17 +231,15 @@
             let hoverId = null;
 
             map.on('mouseenter', 'route', function (e) {
-                console.log(e)
                 var features = e.features
                 if (!features.length) {
                     popup.remove();
                     return;
                 }
                 var feature = features[0];
-                console.log(feature)
                 const destination = 'Helsinki';
                 popup.setLngLat([e.lngLat.lng, e.lngLat.lat])
-                    .setHTML(`<h3>Distance from ${feature.properties.origin} to ${destination}: </h3> <p> ${feature.properties.distance} km </p>`)
+                    .setHTML(`<h3>Distance from ${feature.properties.origin} to ${originCapital}: </h3> <p> ${feature.properties.distance} km </p>`)
                     .addTo(map);
 
                 hoverId = feature.id;
@@ -219,7 +251,6 @@
 
 
             map.on('mouseleave', 'route', function (e) {
-                console.log('run realve', hoverId)
                 const id = hoverId;
 
                 map.getCanvas().style.cursor = '';
@@ -232,10 +263,6 @@
                     );
                     hoverId = null;
                 }
-
-
-
-
             });
         });
 
