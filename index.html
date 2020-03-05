@@ -10,11 +10,17 @@
     <div id='map'></div>
     <script src="./captitals.js"></script>
     <script>
+        const helsinki = {
+            "name": "Helsinki",
+            "CapitalLatitude": 60.166666666666664,
+            "CapitalLongitude": 24.933333,
+        }
+
         mapboxgl.accessToken = 'pk.eyJ1IjoiYW5obmd1eWVuNjI4MSIsImEiOiJjazdka3VsankxMTZ4M2dyd2NrMmRxdzVwIn0.GX9EDHs7fkf2DqEOaYBMSw';
         var map = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v11',
-            zoom: 1
+            style: 'mapbox://styles/mapbox/light-v10',
+            zoom: 2
         });
 
         var libraries = {
@@ -50,19 +56,17 @@
             })
         }
 
-        const helsinki = {
-            "name": "Helsinki",
-            "CapitalLatitude": 60.166666666666664,
-            "CapitalLongitude": 24.933333,
-        }
+
 
 
         const routes = {
             'type': 'FeatureCollection',
             'features': captitals.filter(({ CapitalName }) => CapitalName !== helsinki.name)
-                .map(({ CapitalName: name, CapitalLongitude: longitude, CapitalLatitude: latitude }) => {
+                .map(({ CapitalName: name, CapitalLongitude: longitude, CapitalLatitude: latitude }, index) => {
                     return {
                         'type': 'Feature',
+                        'id': index,
+                        'properties': { origin: name },
                         'geometry': {
                             'type': 'LineString',
                             'coordinates': [[helsinki.CapitalLongitude, helsinki.CapitalLatitude], [Number(longitude), Number(latitude)]]
@@ -71,22 +75,44 @@
                 })
         }
 
-        const lineDistances = routes.features.map(route => {
+        const getLineProperties = (distance) => {
+            const LONG_HAUL = 10000;
+            const UPPER_MEDIUM_HAUL = 5000;
+            const LOWER_MEDIUM_HAUL = 3000;
 
-            var lineDistance = turf.lineDistance(route, 'kilometers');
-            var steps = 500;
-            const arc = []
-            // Draw an arc between the `origin` & `destination` of the two points
-            for (var i = 0; i < lineDistance; i += lineDistance / steps) {
-                var segment = turf.along(route, i, 'kilometers');
-                arc.push(segment.geometry.coordinates);
+
+            if (distance > LONG_HAUL) {
+                return { color: '#D84315', lineWidth: 0.5, distance }
             }
 
 
+            if (distance > UPPER_MEDIUM_HAUL) {
+                return { color: '#1A237E', lineWidth: 1, distance }
+            }
+
+
+            if (distance > LOWER_MEDIUM_HAUL) {
+                return { color: '#00BFA5', lineWidth: 1.5, distance }
+            }
+
+            return { color: '#c41497', lineWidth: 2, distance }
+        }
+
+        const lineDistances = routes.features.map(route => {
+
+            var lineDistance = turf.lineDistance(route, 'kilometers');
+            var steps = 1000;
+            const arc = []
+
+            // Draw an arc between the `origin` & `destination` of the two points
+            for (var i = 0; i <= lineDistance; i += lineDistance / steps) {
+                var segment = turf.along(route, i, 'kilometers');
+                arc.push(segment.geometry.coordinates);
+            }
+            route.properties = { ...route.properties, ...getLineProperties(lineDistance) }
 
             const prev = route.geometry.coordinates
             route.geometry.coordinates = arc
-            console.log(arc[0], prev)
         })
 
         console.log('router', routes)
@@ -117,15 +143,38 @@
                 'source': 'route',
                 'type': 'line',
                 'paint': {
-                    'line-width': 0.1,
-                    'line-color': '#007cbf'
+                    'line-width': [
+                        'case',
+                        ['boolean',
+                            ['feature-state', 'hover'],
+                            false
+                        ],
+                        10,
+                        ['get', 'lineWidth'],
+                    ],
+                    'line-opacity': [
+                        'case',
+                        ['boolean',
+                            ['feature-state', 'hover'],
+                            false
+                        ],
+                        0.8,
+                        1
+                    ],
+                    'line-color': ['get', 'color'],
+                    //'line-color': '#007cbf'
+                },
+                'layout': {
+                    'line-cap': "round"
                 }
             });
 
+
+
             var popup = new mapboxgl.Popup();
 
-            map.on('mousemove', function (e) {
-                var features = map.queryRenderedFeatures(e.point, { layers: ['capitals'] });
+            map.on('mouseenter', 'capitals', function (e) {
+                var features = e.features
                 if (!features.length) {
                     popup.remove();
                     return;
@@ -137,6 +186,56 @@
                     .addTo(map);
 
                 map.getCanvas().style.cursor = features.length ? 'pointer' : '';
+            });
+
+
+            map.on('mouseleave', 'capitals', function () {
+                map.getCanvas().style.cursor = '';
+                popup.remove();
+            });
+
+            let hoverId = null;
+
+            map.on('mouseenter', 'route', function (e) {
+                console.log(e)
+                var features = e.features
+                if (!features.length) {
+                    popup.remove();
+                    return;
+                }
+                var feature = features[0];
+                console.log(feature)
+                const destination = 'Helsinki';
+                popup.setLngLat([e.lngLat.lng, e.lngLat.lat])
+                    .setHTML(`<h3>Distance from ${feature.properties.origin} to ${destination}: </h3> <p> ${feature.properties.distance} km </p>`)
+                    .addTo(map);
+
+                hoverId = feature.id;
+                map.setFeatureState(
+                    { source: 'route', id: hoverId },
+                    { hover: true }
+                );
+            });
+
+
+            map.on('mouseleave', 'route', function (e) {
+                console.log('run realve', hoverId)
+                const id = hoverId;
+
+                map.getCanvas().style.cursor = '';
+                popup.remove();
+
+                if (id != null) {
+                    map.setFeatureState(
+                        { source: 'route', id },
+                        { hover: false }
+                    );
+                    hoverId = null;
+                }
+
+
+
+
             });
         });
 
