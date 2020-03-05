@@ -7,10 +7,21 @@
 </header>
 
 <body>
+    <div id="menu">
+        <input id="light-v10" type="radio" name="rtoggle" value="light" />
+        <label for="light">light</label>
+        <input id="dark-v10" type="radio" name="rtoggle" value="dark" />
+        <label for="dark">dark</label>
+    </div>
     <div id='map'></div>
+
     <script src="./captitals.js"></script>
     <script>
         let originCapital = 'Helsinki';
+
+        let theme = 'light-v10';
+
+
 
         mapboxgl.accessToken = 'pk.eyJ1IjoiYW5obmd1eWVuNjI4MSIsImEiOiJjazdka3VsankxMTZ4M2dyd2NrMmRxdzVwIn0.GX9EDHs7fkf2DqEOaYBMSw';
         var map = new mapboxgl.Map({
@@ -18,6 +29,8 @@
             style: 'mapbox://styles/mapbox/light-v10',
             zoom: 2
         });
+
+
 
         const captitalDots = {
             type: 'FeatureCollection',
@@ -34,6 +47,36 @@
                     }
                 }
             })
+        }
+
+        var layerList = document.getElementById('menu');
+        var inputs = layerList.getElementsByTagName('input');
+
+        function switchLayer(layer) {
+            var theme = layer.target.id;
+            const source = map.getSource('route');
+
+            // Diff failed => force diff to false to rerender the entire map
+            map.setStyle('mapbox://styles/mapbox/' + theme, { diff: false });
+
+            const done = new Promise((resolve, reject) => {
+                map.on('styledata', function () {
+                    resolve("done");
+                })
+            })
+
+            done.then(() => {
+                const data = source._data;
+                data.features.forEach(feature => {
+                    const { distance } = feature.properties
+                    feature.properties = { ...feature.properties, ...getLineProperties(distance, theme) };
+                })
+                addSourceAndLayers(source._data)
+            })
+        }
+
+        for (var i = 0; i < inputs.length; i++) {
+            inputs[i].onclick = switchLayer;
         }
 
         const mappings = (function buildIndex() {
@@ -72,27 +115,46 @@
         }
 
 
-        function getLineProperties(distance) {
+        function getLineProperties(distance, theme) {
             const LONG_HAUL = 10000;
             const UPPER_MEDIUM_HAUL = 5000;
             const LOWER_MEDIUM_HAUL = 3000;
 
+            const colors = {
+                'LONG_HAUL': {
+                    'light-v10': '#D84315',
+                    'dark-v10': '#ffab40'
+                },
+                'UPPER_MEDIUM_HAUL': {
+                    'light-v10': '#1A237E',
+                    'dark-v10': '#448aff'
+                },
+                'LOWER_MEDIUM_HAUL': {
+                    'light-v10': '#00BFA5',
+                    'dark-v10': '#00BFA5'
+                },
+                'SHORT_HAUL': {
+                    'light-v10': '#c41497',
+                    'dark-v10': '#c41497'
+                }
+            }
+
 
             if (distance > LONG_HAUL) {
-                return { color: '#D84315', lineWidth: 0.5, distance }
+                return { color: colors['LONG_HAUL'][theme], lineWidth: 0.5, distance }
             }
 
 
             if (distance > UPPER_MEDIUM_HAUL) {
-                return { color: '#1A237E', lineWidth: 1, distance }
+                return { color: colors['UPPER_MEDIUM_HAUL'][theme], lineWidth: 1, distance }
             }
 
 
             if (distance > LOWER_MEDIUM_HAUL) {
-                return { color: '#00BFA5', lineWidth: 1.5, distance }
+                return { color: colors['LOWER_MEDIUM_HAUL'][theme], lineWidth: 1.5, distance }
             }
 
-            return { color: '#c41497', lineWidth: 2, distance }
+            return { color: colors['SHORT_HAUL'][theme], lineWidth: 2, distance }
         }
 
         function computeDistancesAndLines(routes) {
@@ -107,7 +169,7 @@
                     var segment = turf.along(route, i, 'kilometers');
                     arc.push(segment.geometry.coordinates);
                 }
-                route.properties = { ...route.properties, ...getLineProperties(lineDistance) }
+                route.properties = { ...route.properties, ...getLineProperties(lineDistance, theme) }
 
                 const prev = route.geometry.coordinates
                 route.geometry.coordinates = arc
@@ -125,13 +187,11 @@
             const source = map.getSource('route');
             if (source) {
                 const e = displayFlightRoutes(originCapital);
-                console.log(e, originCapital)
                 source.setData(e)
             }
         }
 
-
-        map.on('load', function () {
+        function addSourceAndLayers(routes) {
             map.addLayer({
                 id: 'capitals',
                 type: 'symbol',
@@ -148,7 +208,7 @@
 
             map.addSource('route', {
                 'type': 'geojson',
-                'data': displayFlightRoutes(originCapital)
+                'data': routes
             });
 
             map.addLayer({
@@ -181,8 +241,12 @@
                     'line-cap': "round"
                 }
             });
+        }
 
 
+        map.on('load', function () {
+            const routes = displayFlightRoutes(originCapital);
+            addSourceAndLayers(routes);
 
             var popup = new mapboxgl.Popup();
 
@@ -199,7 +263,6 @@
                     .addTo(map);
 
                 map.getCanvas().style.cursor = features.length ? 'pointer' : '';
-                console.log(feature)
 
             });
 
@@ -266,7 +329,6 @@
             });
         });
 
-        console.log(captitals)
     </script>
 </body>
 
