@@ -12,41 +12,45 @@ class Stylings {
     }
 
     static COLORS = {
-        [DISTANCE_CATEROGY_NAMES.LONG]: {
-            [LIGHT_THEME]: '#D84315',
-            [DARK_THEME]: '#ffab40'
+        [Stylings.DISTANCE_CATEROGY_NAMES.LONG]: {
+            [Stylings.LIGHT_THEME]: '#D84315',
+            [Stylings.DARK_THEME]: '#ffab40'
         },
-        [DISTANCE_CATEROGY_NAMES.UPPER_MEDIUM]: {
-            [LIGHT_THEME]: '#1A237E',
-            [DARK_THEME]: '#448aff'
+        [Stylings.DISTANCE_CATEROGY_NAMES.UPPER_MEDIUM]: {
+            [Stylings.LIGHT_THEME]: '#1A237E',
+            [Stylings.DARK_THEME]: '#448aff'
         },
-        [DISTANCE_CATEROGY_NAMES.LOWER_MEDIUM]: {
-            [LIGHT_THEME]: '#00BFA5',
-            [DARK_THEME]: '#00BFA5'
+        [Stylings.DISTANCE_CATEROGY_NAMES.LOWER_MEDIUM]: {
+            [Stylings.LIGHT_THEME]: '#00BFA5',
+            [Stylings.DARK_THEME]: '#00BFA5'
         },
-        [DISTANCE_CATEROGY_NAMES.SHORT]: {
-            [LIGHT_THEME]: '#c41497',
-            [DARK_THEME]: '#c41497'
+        [Stylings.DISTANCE_CATEROGY_NAMES.SHORT]: {
+            [Stylings.LIGHT_THEME]: '#c41497',
+            [Stylings.DARK_THEME]: '#c41497'
         }
     }
 
     static LINE_WIDTH = {
-        [DISTANCE_CATEROGY_NAMES.LONG]: 0.5,
-        [DISTANCE_CATEROGY_NAMES.UPPER_MEDIUM]: 1,
-        [DISTANCE_CATEROGY_NAMES.LOWER_MEDIUM]: 1.5,
-        [DISTANCE_CATEROGY_NAMES.SHORT]: 2
+        [Stylings.DISTANCE_CATEROGY_NAMES.LONG]: 0.5,
+        [Stylings.DISTANCE_CATEROGY_NAMES.UPPER_MEDIUM]: 1,
+        [Stylings.DISTANCE_CATEROGY_NAMES.LOWER_MEDIUM]: 1.5,
+        [Stylings.DISTANCE_CATEROGY_NAMES.SHORT]: 2
     }
 
     static MIN_DISTANCE = {
-        [DISTANCE_CATEROGY_NAMES.LONG]: 10000,
-        [DISTANCE_CATEROGY_NAMES.UPPER_MEDIUM]: 5000,
-        [DISTANCE_CATEROGY_NAMES.LOWER_MEDIUM]: 3000,
-        [DISTANCE_CATEROGY_NAMES.SHORT]: 0
+        [Stylings.DISTANCE_CATEROGY_NAMES.LONG]: 10000,
+        [Stylings.DISTANCE_CATEROGY_NAMES.UPPER_MEDIUM]: 5000,
+        [Stylings.DISTANCE_CATEROGY_NAMES.LOWER_MEDIUM]: 3000,
+        [Stylings.DISTANCE_CATEROGY_NAMES.SHORT]: 0
     }
 
-    theme = localStorage.getItem(THEME_KEY) || LIGHT_THEME;
+    theme = localStorage.getItem(Stylings.THEME_KEY) || Stylings.LIGHT_THEME;
 
-    constructor() { }
+    constructor(theme) {
+
+        this.theme = theme ? theme : localStorage.getItem(Stylings.THEME_KEY) || Stylings.LIGHT_THEME;
+        console.log("hello world", Stylings.LIGHT_THEME)
+    }
 
     getTheme() {
         return this.theme;
@@ -54,31 +58,29 @@ class Stylings {
 
     setTheme(themeName) {
         this.theme = themeName;
-        localStorage.setItem(THEME_KEY) = themeName;
+        localStorage.setItem(Stylings.THEME_KEY, themeName);
     }
 
     getLineProperties(distance) {
         const categories = [
-            DISTANCE_CATEROGY_NAMES.LONG,
-            DISTANCE_CATEROGY_NAMES.UPPER_MEDIUM,
-            DISTANCE_CATEROGY_NAMES.LOWER_MEDIUM
+            Stylings.DISTANCE_CATEROGY_NAMES.LONG,
+            Stylings.DISTANCE_CATEROGY_NAMES.UPPER_MEDIUM,
+            Stylings.DISTANCE_CATEROGY_NAMES.LOWER_MEDIUM
         ];
 
         for (const category of categories) {
-            if (distance >= MIN_DISTANCE[category]) {
+            if (distance >= Stylings.MIN_DISTANCE[category]) {
                 return {
-                    color: COLORS[category][theme],
-                    lineWidth: LINE_WIDTH[category],
-                    distance
+                    color: Stylings.COLORS[category][this.theme],
+                    lineWidth: Stylings.LINE_WIDTH[category]
                 }
             }
         }
 
 
         return {
-            color: COLORS[DISTANCE_CATEROGY_NAMES.SHORT][theme],
-            lineWidth: LINE_WIDTH[DISTANCE_CATEROGY_NAMES.SHORT],
-            distance
+            color: Stylings.COLORS[Stylings.DISTANCE_CATEROGY_NAMES.SHORT][this.theme],
+            lineWidth: Stylings.LINE_WIDTH[Stylings.DISTANCE_CATEROGY_NAMES.SHORT]
         };
     }
 

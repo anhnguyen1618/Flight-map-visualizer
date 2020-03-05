@@ -1,4 +1,4 @@
-const captitals = [
+const capitals = [
     {
         "CountryName": "Somaliland",
         "CapitalName": "Hargeisa",
