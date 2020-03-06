@@ -82,9 +82,7 @@ export class Stylings {
     theme = localStorage.getItem(Stylings.THEME_KEY) || Stylings.LIGHT_THEME;
 
     constructor(theme) {
-
         this.theme = theme ? theme : localStorage.getItem(Stylings.THEME_KEY) || Stylings.LIGHT_THEME;
-        console.log("hello world", Stylings.LIGHT_THEME)
     }
 
     getTheme() {

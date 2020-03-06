@@ -26,6 +26,7 @@ export class DataProcessor {
                     this.capitalData = data;
                     this.computeCapitalPoints();
                     this.buildMapFromCapitalNameToInfo();
+
                     resolve()
                 },
                 error: () => {

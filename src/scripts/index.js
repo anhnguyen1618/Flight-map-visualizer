@@ -3,6 +3,8 @@ import { DataProcessor } from './data-processor.js';
 import { MapWrapper } from './map-wrapper.js';
 import { ThemeSelector } from './theme-selector.js';
 
+import '../styles/index.css';
+
 const CAPITAL_JSON_URL = '/capitals';
 
 function runApp() {
