@@ -1,4 +1,5 @@
 import * as turf from "@turf/turf";
+import { GreatCircle } from "arc";
 import $ from "jquery";
 
 export class DataProcessor {
@@ -112,18 +113,25 @@ export class DataProcessor {
     addDistancesAndConvertStraightLineToArc(routes) {
         routes.features.forEach(route => {
 
-            var lineDistance = turf.length(route, { units: 'kilometers' });
-            var steps = 1000;
-            const arc = [];
+            /**
+             * Arc.js is used here to compute points along the arc as the method to draw arc at https://docs.mapbox.com/mapbox-gl-js/example/animate-point-along-route/
+             * is broken for some long distances route. For example, if origin = [-171.933333, -13.95] and destination = [71.416667, 51.166666666666664], the line rendered has a weird shape. For example, https://jsfiddle.net/anhnguyen1/e1h62qga/
+             */
+            const [[srcLong, srcLat], [dstLong, dstLat]] = route.geometry.coordinates;
+            const src = { x: srcLong, y: srcLat };
+            const dest = { x: dstLong, y: dstLat };
+            var generator = new GreatCircle(src, dest);
 
-            // Draw an arc between the `origin` & `destination` of the two points
-            for (var i = 0; i <= lineDistance; i += lineDistance / steps) {
-                var segment = turf.along(route, i, { units: 'kilometers' });
-                arc.push(segment.geometry.coordinates);
-            }
+
+            const NUMBER_OF_POINTS_ALONG_THE_LINE = 500;
+            var line = generator.Arc(NUMBER_OF_POINTS_ALONG_THE_LINE);
+            var lineDistance = turf.length(route, { units: 'kilometers' });
+
+
             route.properties = { ...route.properties, distance: lineDistance, ...this.styling.getLineStyles(lineDistance) }
 
-            route.geometry.coordinates = arc
+            route.geometry = line.json().geometry
+
         })
     }
 

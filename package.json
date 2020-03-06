@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@turf/turf": "^5.1.6",
+    "arc": "^0.1.1",
     "jquery": "^3.4.1",
     "mapbox-gl": "^1.8.1"
   }
