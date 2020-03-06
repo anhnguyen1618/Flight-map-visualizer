@@ -38,7 +38,7 @@ export class Stylings {
     }
 
     static LINE_WIDTH = {
-        [Stylings.DISTANCE_CATEROGY_NAMES.LONG]: 0.5,
+        [Stylings.DISTANCE_CATEROGY_NAMES.LONG]: 0.7,
         [Stylings.DISTANCE_CATEROGY_NAMES.UPPER_MEDIUM]: 1,
         [Stylings.DISTANCE_CATEROGY_NAMES.LOWER_MEDIUM]: 1.5,
         [Stylings.DISTANCE_CATEROGY_NAMES.SHORT]: 2
@@ -55,21 +55,21 @@ export class Stylings {
         'paint': {
             'line-width': [
                 'case',
-                ['boolean',
+                ['==',
                     ['feature-state', 'hover'],
-                    false
+                    true
                 ],
                 10,
                 ['get', 'lineWidth']
             ],
-            'line-opacity': [
+            'line-blur': [
                 'case',
-                ['boolean',
+                ['==',
                     ['feature-state', 'hover'],
-                    false
+                    true
                 ],
-                0.8,
-                1
+                3,
+                0
             ],
             'line-color': ['get', 'color']
         },
@@ -87,6 +87,8 @@ export class Stylings {
 
     theme = localStorage.getItem(Stylings.THEME_KEY) || Stylings.LIGHT_THEME;
 
+    highLightedCategory = '';
+
     constructor(theme) {
         this.theme = theme ? theme : localStorage.getItem(Stylings.THEME_KEY) || Stylings.LIGHT_THEME;
     }
@@ -100,12 +102,21 @@ export class Stylings {
         localStorage.setItem(Stylings.THEME_KEY, themeName);
     }
 
-    getLineStyles(distance) {
+    setHighLightedCategory(highLightedCategory) {
+        this.highLightedCategory = highLightedCategory;
+    }
+
+    getHighLightedCategory() {
+        return this.highLightedCategory;
+    }
+
+    getLineProperties(distance) {
         for (const category of Stylings.CATEGORY_NAMES_IN_DESC_ORDER) {
             if (distance >= Stylings.MIN_DISTANCE[category]) {
                 return {
                     color: Stylings.COLORS[category][this.theme],
-                    lineWidth: Stylings.LINE_WIDTH[category]
+                    lineWidth: Stylings.LINE_WIDTH[category],
+                    category
                 };
             }
         }
@@ -113,7 +124,8 @@ export class Stylings {
 
         return {
             color: Stylings.COLORS[Stylings.DISTANCE_CATEROGY_NAMES.SHORT][this.theme],
-            lineWidth: Stylings.LINE_WIDTH[Stylings.DISTANCE_CATEROGY_NAMES.SHORT]
+            lineWidth: Stylings.LINE_WIDTH[Stylings.DISTANCE_CATEROGY_NAMES.SHORT],
+            category
         };
     }
 

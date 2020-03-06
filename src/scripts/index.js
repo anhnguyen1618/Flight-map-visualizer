@@ -16,7 +16,15 @@ function runApp() {
 
     const mapWrapper = new MapWrapper(styling, dataProcessor);
 
-    ThemeSelector.themeChange(styling, mapWrapper.changeTheme.bind(mapWrapper));
+    ThemeSelector.themeChange(styling, theme => {
+        styling.setTheme(theme);
+        mapWrapper.changeTheme(theme);
+    });
+
+    ThemeSelector.colorHighlighterChange(styling, (category) => {
+        styling.setHighLightedCategory(category);
+        mapWrapper.highLightLines();
+    });
 }
 
 $(document).ready(() => {

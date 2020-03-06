@@ -138,7 +138,7 @@ export class DataProcessor {
             const lineDistance = turf.length(route, { units: 'kilometers' });
 
 
-            route.properties = { ...route.properties, distance: lineDistance, ...this.styling.getLineStyles(lineDistance) };
+            route.properties = { ...route.properties, distance: lineDistance, ...this.styling.getLineProperties(lineDistance) };
 
             route.geometry = line.json().geometry;
 

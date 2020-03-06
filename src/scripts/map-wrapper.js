@@ -37,9 +37,10 @@ export class MapWrapper {
             const data = source._data;
             data.features.forEach(feature => {
                 const { distance } = feature.properties;
-                feature.properties = { ...feature.properties, ...this.styling.getLineStyles(distance) };
+                feature.properties = { ...feature.properties, ...this.styling.getLineProperties(distance) };
             });
             this.addSourceAndLayers(source._data);
+            this.highLightLines(this.styling.getHighLightedCategory());
         });
     }
 
@@ -90,6 +91,27 @@ export class MapWrapper {
                 return t;
             }
         });
+    }
+
+    highLightLines() {
+        const category = this.styling.getHighLightedCategory();
+
+        if (!category) {
+            this.map.setPaintProperty(
+                'route',
+                'line-opacity',
+                1
+            );
+            return;
+        }
+
+        this.map.setPaintProperty(
+            'route',
+            'line-opacity',
+            ['case',
+                ["==", ['get', 'category'], category], 1, 0.1
+            ]
+        );
     }
 
     render() {

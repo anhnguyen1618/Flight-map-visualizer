@@ -9,7 +9,7 @@ export class ThemeSelector {
             input.checked = input.value === styling.getTheme();
         });
 
-        this.setDescription(styling.getTheme());
+        ThemeSelector.setDescription(styling.getTheme());
 
         themeSelectors.click(e => {
             const theme = e.target.value;
@@ -17,20 +17,21 @@ export class ThemeSelector {
                 return;
             }
 
-            this.setDescription(theme);
-            styling.setTheme(theme);
+            ThemeSelector.setDescription(theme);
 
             callBack(theme);
         });
     }
 
     static setDescription(theme) {
-        const categoryDescription = Stylings.CATEGORY_NAMES_IN_DESC_ORDER.map((name, index) => {
-            const minDistance = Stylings.MIN_DISTANCE[name];
+        const categoryDescription = Stylings.CATEGORY_NAMES_IN_DESC_ORDER.map((categoryName, index) => {
+            const minDistance = Stylings.MIN_DISTANCE[categoryName];
             const prevMinDistance = index >= 1 ? Stylings.MIN_DISTANCE[Stylings.CATEGORY_NAMES_IN_DESC_ORDER[index - 1]] : "";
+            const backgroundColor = Stylings.COLORS[categoryName][theme];
+
             return `
             <div class="category">
-                <div class="color-indicator" style="background-color: ${Stylings.COLORS[name][theme]}"></div>
+                <div class="color-indicator" id="${categoryName}" style="background-color: ${backgroundColor}"></div>
                 <div class="description">
                     ${index > 0 ? `${minDistance} - ${prevMinDistance}` : `>= ${minDistance}`}
                 </div>
@@ -41,5 +42,23 @@ export class ThemeSelector {
         const header = `<h4 class="title">Min distance (km)</h4>`;
 
         $('#description').html(header + categoryDescription);
+    }
+
+    static colorHighlighterChange(styling, callBack) {
+        $('#reset-button').hide();
+
+        $('#description').on('mouseenter', '.color-indicator', e => {
+            $('#reset-button').show(200);
+            const category = e.target.id;
+            if (category === styling.getHighLightedCategory()) {
+                return;
+            }
+            callBack(category);
+        })
+
+        $('#reset-button').click(e => {
+            $('#reset-button').hide(200);
+            callBack();
+        })
     }
 }
