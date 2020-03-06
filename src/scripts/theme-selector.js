@@ -17,6 +17,6 @@ export class ThemeSelector {
             styling.setTheme(theme);
 
             callBack(theme);
-        })
+        });
     }
 }

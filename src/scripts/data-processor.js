@@ -31,10 +31,10 @@ export class DataProcessor {
                     this.computeCapitalPoints();
                     this.buildMapFromCapitalNameToInfo();
 
-                    resolve()
+                    resolve();
                 },
                 error: () => {
-                    reject(`Capital data at "${this.url}" is not available`)
+                    reject(`Capital data at "${this.url}" is not available`);
                 }
             });
         });
@@ -57,13 +57,13 @@ export class DataProcessor {
                     type: 'Point',
                     coordinates: [longitude, latitude]
                 }
-            }
-        })
+            };
+        });
 
         this.capitalPoints = {
             type: 'FeatureCollection',
             features
-        }
+        };
     }
 
     getCapitalPoints() {
@@ -79,12 +79,12 @@ export class DataProcessor {
     }
 
     computeStraightLineRoutes(origin) {
-        const originInfo = this.nameToInfoMappings[origin]
+        const originInfo = this.nameToInfoMappings[origin];
         if (!originInfo) {
             return {
                 'type': 'FeatureCollection',
                 'features': []
-            }
+            };
         }
 
         return {
@@ -107,7 +107,7 @@ export class DataProcessor {
                         }
                     };
                 })
-        }
+        };
     }
 
     addDistancesAndConvertStraightLineToArc(routes) {
@@ -120,19 +120,19 @@ export class DataProcessor {
             const [[srcLong, srcLat], [dstLong, dstLat]] = route.geometry.coordinates;
             const src = { x: srcLong, y: srcLat };
             const dest = { x: dstLong, y: dstLat };
-            var generator = new GreatCircle(src, dest);
+            const generator = new GreatCircle(src, dest);
 
 
             const NUMBER_OF_POINTS_ALONG_THE_LINE = 500;
-            var line = generator.Arc(NUMBER_OF_POINTS_ALONG_THE_LINE);
-            var lineDistance = turf.length(route, { units: 'kilometers' });
+            const line = generator.Arc(NUMBER_OF_POINTS_ALONG_THE_LINE);
+            const lineDistance = turf.length(route, { units: 'kilometers' });
 
 
-            route.properties = { ...route.properties, distance: lineDistance, ...this.styling.getLineStyles(lineDistance) }
+            route.properties = { ...route.properties, distance: lineDistance, ...this.styling.getLineStyles(lineDistance) };
 
-            route.geometry = line.json().geometry
+            route.geometry = line.json().geometry;
 
-        })
+        });
     }
 
     getOriginCapital() {

@@ -21,6 +21,6 @@ function runApp() {
 
 $(document).ready(() => {
     runApp();
-})
+});
 
 

@@ -53,7 +53,7 @@ export class Stylings {
                     false
                 ],
                 10,
-                ['get', 'lineWidth'],
+                ['get', 'lineWidth']
             ],
             'line-opacity': [
                 'case',
@@ -64,8 +64,7 @@ export class Stylings {
                 0.8,
                 1
             ],
-            'line-color': ['get', 'color'],
-            //'line-color': '#007cbf'
+            'line-color': ['get', 'color']
         },
         'layout': {
             'line-cap': "round"
@@ -106,7 +105,7 @@ export class Stylings {
                 return {
                     color: Stylings.COLORS[category][this.theme],
                     lineWidth: Stylings.LINE_WIDTH[category]
-                }
+                };
             }
         }
 

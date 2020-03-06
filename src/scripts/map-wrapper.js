@@ -16,7 +16,7 @@ export class MapWrapper {
 
 
         this.dataProcessor.load()
-            .then(() => { this.render() })
+            .then(() => this.render())
             .catch(err => alert(err));
     }
 
@@ -26,21 +26,21 @@ export class MapWrapper {
         // automatic diff failed => force diff to false to rerender the entire map
         this.map.setStyle(`mapbox://styles/mapbox/${theme}`, { diff: false });
 
-        const done = new Promise((resolve, reject) => {
+        const done = new Promise((resolve) => {
             this.map.on('styledata', function () {
                 resolve("done");
-            })
-        })
+            });
+        });
 
 
         done.then(() => {
             const data = source._data;
             data.features.forEach(feature => {
-                const { distance } = feature.properties
+                const { distance } = feature.properties;
                 feature.properties = { ...feature.properties, ...this.styling.getLineStyles(distance) };
             });
             this.addSourceAndLayers(source._data);
-        })
+        });
     }
 
     replaceOrigin(newOrigin) {
@@ -52,7 +52,7 @@ export class MapWrapper {
         const source = this.map.getSource('route');
         if (source) {
             const arcs = this.dataProcessor.getArcLinesFromOrigin();
-            source.setData(arcs)
+            source.setData(arcs);
         }
     }
 
@@ -85,14 +85,14 @@ export class MapWrapper {
             const routes = this.dataProcessor.getArcLinesFromOrigin();
             this.addSourceAndLayers(routes);
 
-            var popup = new mapboxgl.Popup();
+            const popup = new mapboxgl.Popup();
 
             this.map.on('mouseenter', 'capitals', ({ features }) => {
                 if (!features.length) {
                     popup.remove();
                     return;
                 }
-                var feature = features[0];
+                const feature = features[0];
 
                 popup.setLngLat(feature.geometry.coordinates)
                     .setHTML(`<h3>${feature.properties.Name}</h3> <p> ${feature.properties.Description} </p>`)
@@ -106,14 +106,14 @@ export class MapWrapper {
                 if (!features.length) {
                     return;
                 }
-                var feature = features[0];
+                const feature = features[0];
 
                 this.map.flyTo({
                     center: feature.geometry.coordinates, speed: 0.2, easing: function (t) {
                         return t;
-                    },
+                    }
                 });
-                this.replaceOrigin(feature.properties.Name)
+                this.replaceOrigin(feature.properties.Name);
             });
 
 
@@ -130,7 +130,7 @@ export class MapWrapper {
                     popup.remove();
                     return;
                 }
-                var feature = features[0];
+                const feature = features[0];
 
                 popup.setLngLat(lngLat.toArray())
                     .setHTML(`<h3>Distance ${feature.properties.origin} - ${this.dataProcessor.getOriginCapital()}: </h3> <p> ${feature.properties.distance} km </p>`)
@@ -150,7 +150,7 @@ export class MapWrapper {
                 this.map.getCanvas().style.cursor = '';
                 popup.remove();
 
-                if (id != null) {
+                if (id !== null) {
                     this.map.setFeatureState(
                         { source: 'route', id },
                         { hover: false }
