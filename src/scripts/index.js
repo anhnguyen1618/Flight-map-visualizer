@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 import { Stylings } from './stylings.js';
 import { DataProcessor } from './data-processor.js';
 import { MapWrapper } from './map-wrapper.js';

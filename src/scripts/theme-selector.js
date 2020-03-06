@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 export class ThemeSelector {
     static themeChange(styling, callBack) {
         const themeSelectors = $('#menu input');

@@ -1,3 +1,5 @@
+import mapboxgl from 'mapbox-gl/dist/mapbox-gl.js';
+
 import { Stylings } from './stylings.js';
 
 export class MapWrapper {

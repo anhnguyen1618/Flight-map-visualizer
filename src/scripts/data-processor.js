@@ -1,3 +1,6 @@
+import * as turf from "@turf/turf";
+import $ from "jquery";
+
 export class DataProcessor {
     static DEFAULT_ORIGIN = 'Helsinki';
 
@@ -109,13 +112,13 @@ export class DataProcessor {
     addDistancesAndConvertStraightLineToArc(routes) {
         routes.features.forEach(route => {
 
-            var lineDistance = turf.lineDistance(route, 'kilometers');
+            var lineDistance = turf.length(route, { units: 'kilometers' });
             var steps = 1000;
             const arc = [];
 
             // Draw an arc between the `origin` & `destination` of the two points
             for (var i = 0; i <= lineDistance; i += lineDistance / steps) {
-                var segment = turf.along(route, i, 'kilometers');
+                var segment = turf.along(route, i, { units: 'kilometers' });
                 arc.push(segment.geometry.coordinates);
             }
             route.properties = { ...route.properties, distance: lineDistance, ...this.styling.getLineStyles(lineDistance) }
