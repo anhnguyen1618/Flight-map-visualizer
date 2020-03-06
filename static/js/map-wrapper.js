@@ -11,6 +11,11 @@ export class MapWrapper {
             style: `mapbox://styles/mapbox/${styling.getTheme()}`,
             zoom: 2
         });
+
+
+        this.dataProcessor.load()
+            .then(() => { this.render() })
+            .catch(err => alert(err));
     }
 
     changeTheme(theme) {
@@ -73,7 +78,7 @@ export class MapWrapper {
         });
     }
 
-    initMap() {
+    render() {
         this.map.on('load', () => {
             const routes = this.dataProcessor.getArcLinesFromOrigin();
             this.addSourceAndLayers(routes);

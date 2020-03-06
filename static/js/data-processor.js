@@ -9,12 +9,30 @@ export class DataProcessor {
 
     originCapital = DataProcessor.DEFAULT_ORIGIN;
 
-    constructor(capitalData, styling) {
-        this.capitalData = capitalData || [];
-        this.styling = styling;
+    url = "/";
 
-        this.computeCapitalPoints();
-        this.buildMapFromCapitalNameToInfo();
+    constructor(url, styling) {
+        this.url = url;
+        this.styling = styling;
+    }
+
+    load() {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                type: 'GET',
+                url: this.url,
+                dataType: 'json',
+                success: (data) => {
+                    this.capitalData = data;
+                    this.computeCapitalPoints();
+                    this.buildMapFromCapitalNameToInfo();
+                    resolve()
+                },
+                error: () => {
+                    reject(`Capital data at "${this.url}" is not available`)
+                }
+            });
+        });
     }
 
     computeCapitalPoints() {
@@ -92,7 +110,7 @@ export class DataProcessor {
 
             var lineDistance = turf.lineDistance(route, 'kilometers');
             var steps = 1000;
-            const arc = []
+            const arc = [];
 
             // Draw an arc between the `origin` & `destination` of the two points
             for (var i = 0; i <= lineDistance; i += lineDistance / steps) {
