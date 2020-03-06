@@ -11,6 +11,10 @@ body {
 }
 
 #menu {
+    border-radius: 10px;
+    top: 10px;
+    left: 10px;
+    box-shadow: 0 10px 16px 0 rgba(0,0,0,0.7), 0 6px 20px 0 rgba(0,0,0,0.7);
     position: absolute;
     background: #fff;
     padding: 10px;

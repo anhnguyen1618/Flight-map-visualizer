@@ -3,12 +3,17 @@ class DataProcessor {
 
     capitalData = [];
 
-    nameToInfoMappings = {}
+    nameToInfoMappings = {};
+
+    capitalPoints = {};
+
+    originCapital = DataProcessor.DEFAULT_ORIGIN;
 
     constructor(capitalData, styling) {
         this.capitalData = capitalData || [];
-        console.log(this.capitalData)
         this.styling = styling;
+
+        this.computeCapitalPoints();
         this.buildMapFromCapitalNameToInfo();
     }
 
@@ -32,11 +37,14 @@ class DataProcessor {
             }
         })
 
-
-        return {
+        this.capitalPoints = {
             type: 'FeatureCollection',
             features
         }
+    }
+
+    getCapitalPoints() {
+        return this.capitalPoints;
     }
 
     buildMapFromCapitalNameToInfo() {
@@ -50,7 +58,6 @@ class DataProcessor {
 
     computeStraightLineRoutes(origin) {
         const originInfo = this.nameToInfoMappings[origin]
-        console.log('info', originInfo, origin)
         if (!originInfo) {
             return {
                 'type': 'FeatureCollection',
@@ -99,9 +106,22 @@ class DataProcessor {
         })
     }
 
-    getArcLinesFromOrigin(origin) {
-        const routes = this.computeStraightLineRoutes(origin);
-        console.log('routes', routes)
+    getOriginCapital() {
+        return this.originCapital;
+    }
+
+    setOriginCapital(newOriginCapital) {
+        console.log(newOriginCapital)
+        if (this.originCapital === newOriginCapital) {
+            return false;
+        }
+
+        this.originCapital = newOriginCapital;
+        return true;
+    }
+
+    getArcLinesFromOrigin() {
+        const routes = this.computeStraightLineRoutes(this.originCapital);
         this.addDistancesAndConvertStraightLineToArc(routes);
         return routes;
     }

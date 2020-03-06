@@ -20,177 +20,20 @@
 
     <script src="./captitals.js"></script>
     <script src="./stylings.js"></script>
-    <script src="./style-selector.js"></script>
+    <script src="./theme-selector.js"></script>
     <script src="./data-processor.js"></script>
     <script src="./map-manipulator.js"></script>
+    <script src="./map-wrapper.js"></script>
     <script>
         const styling = new Stylings();
 
+        const dataProcessor = new DataProcessor(capitalsData, styling);
 
-        let originCapital = 'Helsinki';
+        const mapWrapper = new MapWrapper(styling, dataProcessor);
 
+        mapWrapper.initMap();
 
-        mapboxgl.accessToken = 'pk.eyJ1IjoiYW5obmd1eWVuNjI4MSIsImEiOiJjazdka3VsankxMTZ4M2dyd2NrMmRxdzVwIn0.GX9EDHs7fkf2DqEOaYBMSw';
-        var map = new mapboxgl.Map({
-            container: 'map',
-            style: `mapbox://styles/mapbox/${styling.getTheme()}`,
-            zoom: 2
-        });
-
-        const dataProcessor = new DataProcessor(capitals, styling);
-
-        const capitalPoints = dataProcessor.computeCapitalPoints();
-
-
-        StyleSelector.initDom(map, capitalPoints, styling);
-
-        function replaceOrigin(newOrigin) {
-            originCapital = newOrigin;
-            const source = map.getSource('route');
-            if (source) {
-                const arcs = dataProcessor.getArcLinesFromOrigin(originCapital);
-                source.setData(arcs)
-            }
-        }
-
-        function addSourceAndLayers(routes, capitalDots) {
-            map.addLayer({
-                id: 'capitals',
-                type: 'symbol',
-                source: {
-                    type: 'geojson',
-                    data: capitalDots
-                },
-                layout: {
-                    'icon-image': 'airport-11',
-                    'icon-allow-overlap': true
-                },
-                paint: {}
-            });
-
-            map.addSource('route', {
-                'type': 'geojson',
-                'data': routes
-            });
-
-            map.addLayer({
-                'id': 'route',
-                'source': 'route',
-                'type': 'line',
-                'paint': {
-                    'line-width': [
-                        'case',
-                        ['boolean',
-                            ['feature-state', 'hover'],
-                            false
-                        ],
-                        10,
-                        ['get', 'lineWidth'],
-                    ],
-                    'line-opacity': [
-                        'case',
-                        ['boolean',
-                            ['feature-state', 'hover'],
-                            false
-                        ],
-                        0.8,
-                        1
-                    ],
-                    'line-color': ['get', 'color'],
-                    //'line-color': '#007cbf'
-                },
-                'layout': {
-                    'line-cap': "round"
-                }
-            });
-        }
-
-
-        map.on('load', function () {
-            const routes = dataProcessor.getArcLinesFromOrigin(DataProcessor.DEFAULT_ORIGIN);
-            console.log(routes)
-            addSourceAndLayers(routes, capitalPoints);
-
-            var popup = new mapboxgl.Popup();
-
-            map.on('mouseenter', 'capitals', function (e) {
-                var features = e.features
-                if (!features.length) {
-                    popup.remove();
-                    return;
-                }
-                var feature = features[0];
-
-                popup.setLngLat(feature.geometry.coordinates)
-                    .setHTML(`<h3>${feature.properties.Name}</h3> <p> ${feature.properties.Description} </p>`)
-                    .addTo(map);
-
-                map.getCanvas().style.cursor = features.length ? 'pointer' : '';
-
-            });
-
-            map.on('click', 'capitals', function (e) {
-                var features = e.features
-                if (!features.length) {
-                    return;
-                }
-                var feature = features[0];
-
-                map.flyTo({
-                    center: feature.geometry.coordinates, speed: 0.2, easing: function (t) {
-                        return t;
-                    },
-                });
-                /*map.setFeatureState(
-                        { source: 'route', id },
-                        { focused: false }
-                    );*/
-                replaceOrigin(feature.properties.Name)
-            });
-
-
-            map.on('mouseleave', 'capitals', function () {
-                map.getCanvas().style.cursor = '';
-                popup.remove();
-            });
-
-            let hoverId = null;
-
-            map.on('mouseenter', 'route', function (e) {
-                var features = e.features
-                if (!features.length) {
-                    popup.remove();
-                    return;
-                }
-                var feature = features[0];
-                const destination = 'Helsinki';
-                popup.setLngLat([e.lngLat.lng, e.lngLat.lat])
-                    .setHTML(`<h3>Distance from ${feature.properties.origin} to ${originCapital}: </h3> <p> ${feature.properties.distance} km </p>`)
-                    .addTo(map);
-
-                hoverId = feature.id;
-                map.setFeatureState(
-                    { source: 'route', id: hoverId },
-                    { hover: true }
-                );
-            });
-
-
-            map.on('mouseleave', 'route', function (e) {
-                const id = hoverId;
-
-                map.getCanvas().style.cursor = '';
-                popup.remove();
-
-                if (id != null) {
-                    map.setFeatureState(
-                        { source: 'route', id },
-                        { hover: false }
-                    );
-                    hoverId = null;
-                }
-            });
-        });
+        ThemeSelector.themeChange(styling, mapWrapper.changeTheme.bind(mapWrapper));
 
     </script>
 </body>
