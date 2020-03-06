@@ -1,4 +1,6 @@
-class MapWrapper {
+import { Stylings } from './stylings.js';
+
+export class MapWrapper {
     constructor(styling, dataProcessor) {
         this.styling = styling;
         this.dataProcessor = dataProcessor;
@@ -28,7 +30,7 @@ class MapWrapper {
             const data = source._data;
             data.features.forEach(feature => {
                 const { distance } = feature.properties
-                feature.properties = { ...feature.properties, ...styling.getLineStyles(distance) };
+                feature.properties = { ...feature.properties, ...this.styling.getLineStyles(distance) };
             });
             this.addSourceAndLayers(source._data);
         })
@@ -70,7 +72,6 @@ class MapWrapper {
             ...Stylings.ROUTE_STYLES
         });
     }
-
 
     initMap() {
         this.map.on('load', () => {

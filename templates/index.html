@@ -6,7 +6,7 @@
 
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
         integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8=" crossorigin="anonymous"></script>
-    <link href="./index.css" rel="stylesheet" />
+    <link href="/static/css/index.css" rel="stylesheet" />
 </header>
 
 <body>
@@ -18,24 +18,7 @@
     </div>
     <div id='map'></div>
 
-    <script src="./captitals.js"></script>
-    <script src="./stylings.js"></script>
-    <script src="./theme-selector.js"></script>
-    <script src="./data-processor.js"></script>
-    <script src="./map-manipulator.js"></script>
-    <script src="./map-wrapper.js"></script>
-    <script>
-        const styling = new Stylings();
-
-        const dataProcessor = new DataProcessor(capitalsData, styling);
-
-        const mapWrapper = new MapWrapper(styling, dataProcessor);
-
-        mapWrapper.initMap();
-
-        ThemeSelector.themeChange(styling, mapWrapper.changeTheme.bind(mapWrapper));
-
-    </script>
+    <script type="module" src="/static/js/index.js"></script>
 </body>
 
 </html>

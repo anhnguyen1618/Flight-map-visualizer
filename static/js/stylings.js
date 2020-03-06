@@ -1,4 +1,4 @@
-class Stylings {
+export class Stylings {
 
     static THEME_KEY = 'THEME';
     static LIGHT_THEME = 'light-v10';

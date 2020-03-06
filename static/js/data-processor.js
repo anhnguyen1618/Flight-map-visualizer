@@ -1,4 +1,4 @@
-class DataProcessor {
+export class DataProcessor {
     static DEFAULT_ORIGIN = 'Helsinki';
 
     capitalData = [];

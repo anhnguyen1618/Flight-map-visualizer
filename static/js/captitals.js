@@ -1,4 +1,4 @@
-const capitalsData = [
+export const capitalsData = [
     {
         "CountryName": "Somaliland",
         "CapitalName": "Hargeisa",
