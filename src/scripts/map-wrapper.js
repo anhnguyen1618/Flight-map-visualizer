@@ -80,8 +80,23 @@ export class MapWrapper {
         });
     }
 
+    flyTo(centerCoordinates) {
+        if (!centerCoordinates || centerCoordinates.length < 2) {
+            return;
+        }
+
+        this.map.flyTo({
+            center: centerCoordinates, speed: 0.2, easing: function (t) {
+                return t;
+            }
+        });
+    }
+
     render() {
         this.map.on('load', () => {
+
+            this.flyTo(this.dataProcessor.getOriginCoordinates());
+            this.dataProcessor.getOriginCoordinates();
             const routes = this.dataProcessor.getArcLinesFromOrigin();
             this.addSourceAndLayers(routes);
 
@@ -107,12 +122,8 @@ export class MapWrapper {
                     return;
                 }
                 const feature = features[0];
+                this.flyTo(feature.geometry.coordinates);
 
-                this.map.flyTo({
-                    center: feature.geometry.coordinates, speed: 0.2, easing: function (t) {
-                        return t;
-                    }
-                });
                 this.replaceOrigin(feature.properties.Name);
             });
 

@@ -11,6 +11,13 @@ export class Stylings {
         SHORT: 'SHORT'
     }
 
+    static CATEGORY_NAMES_IN_DESC_ORDER = [
+        Stylings.DISTANCE_CATEROGY_NAMES.LONG,
+        Stylings.DISTANCE_CATEROGY_NAMES.UPPER_MEDIUM,
+        Stylings.DISTANCE_CATEROGY_NAMES.LOWER_MEDIUM,
+        Stylings.DISTANCE_CATEROGY_NAMES.SHORT
+    ]
+
     static COLORS = {
         [Stylings.DISTANCE_CATEROGY_NAMES.LONG]: {
             [Stylings.LIGHT_THEME]: '#D84315',
@@ -94,13 +101,7 @@ export class Stylings {
     }
 
     getLineStyles(distance) {
-        const categories = [
-            Stylings.DISTANCE_CATEROGY_NAMES.LONG,
-            Stylings.DISTANCE_CATEROGY_NAMES.UPPER_MEDIUM,
-            Stylings.DISTANCE_CATEROGY_NAMES.LOWER_MEDIUM
-        ];
-
-        for (const category of categories) {
+        for (const category of Stylings.CATEGORY_NAMES_IN_DESC_ORDER) {
             if (distance >= Stylings.MIN_DISTANCE[category]) {
                 return {
                     color: Stylings.COLORS[category][this.theme],

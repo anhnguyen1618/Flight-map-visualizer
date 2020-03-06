@@ -78,6 +78,17 @@ export class DataProcessor {
         this.nameToInfoMappings = index;
     }
 
+    getOriginCoordinates() {
+        if (!this.nameToInfoMappings || !this.nameToInfoMappings[this.originCapital]) {
+            console.warn(`Origin capital not found!!!`);
+            return [];
+        }
+
+        const { CapitalLongitude: longitude, CapitalLatitude: latitude } = this.nameToInfoMappings[this.originCapital];
+
+        return [longitude, latitude];
+    }
+
     computeStraightLineRoutes(origin) {
         const originInfo = this.nameToInfoMappings[origin];
         if (!originInfo) {
@@ -112,7 +123,6 @@ export class DataProcessor {
 
     addDistancesAndConvertStraightLineToArc(routes) {
         routes.features.forEach(route => {
-
             /**
              * Arc.js is used here to compute points along the arc as the method to draw arc at https://docs.mapbox.com/mapbox-gl-js/example/animate-point-along-route/
              * is broken for some long distances route. For example, if origin = [-171.933333, -13.95] and destination = [71.416667, 51.166666666666664], the line rendered has a weird shape. For example, https://jsfiddle.net/anhnguyen1/e1h62qga/
