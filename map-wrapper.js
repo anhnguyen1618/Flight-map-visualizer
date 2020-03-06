@@ -28,7 +28,7 @@ class MapWrapper {
             const data = source._data;
             data.features.forEach(feature => {
                 const { distance } = feature.properties
-                feature.properties = { ...feature.properties, ...styling.getLineProperties(distance) };
+                feature.properties = { ...feature.properties, ...styling.getLineStyles(distance) };
             });
             this.addSourceAndLayers(source._data);
         })
@@ -55,11 +55,7 @@ class MapWrapper {
                 type: 'geojson',
                 data: this.dataProcessor.getCapitalPoints()
             },
-            layout: {
-                'icon-image': 'airport-11',
-                'icon-allow-overlap': true
-            },
-            paint: {}
+            ...Stylings.CAPITAL_ICON_STYLES
         });
 
         this.map.addSource('route', {
@@ -71,31 +67,7 @@ class MapWrapper {
             'id': 'route',
             'source': 'route',
             'type': 'line',
-            'paint': {
-                'line-width': [
-                    'case',
-                    ['boolean',
-                        ['feature-state', 'hover'],
-                        false
-                    ],
-                    10,
-                    ['get', 'lineWidth'],
-                ],
-                'line-opacity': [
-                    'case',
-                    ['boolean',
-                        ['feature-state', 'hover'],
-                        false
-                    ],
-                    0.8,
-                    1
-                ],
-                'line-color': ['get', 'color'],
-                //'line-color': '#007cbf'
-            },
-            'layout': {
-                'line-cap': "round"
-            }
+            ...Stylings.ROUTE_STYLES
         });
     }
 

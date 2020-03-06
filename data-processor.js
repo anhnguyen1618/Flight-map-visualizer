@@ -53,7 +53,6 @@ class DataProcessor {
             index[capital.CapitalName] = capital;
         }
         this.nameToInfoMappings = index;
-        console.log(index)
     }
 
     computeStraightLineRoutes(origin) {
@@ -100,7 +99,7 @@ class DataProcessor {
                 var segment = turf.along(route, i, 'kilometers');
                 arc.push(segment.geometry.coordinates);
             }
-            route.properties = { ...route.properties, distance: lineDistance, ...this.styling.getLineProperties(lineDistance) }
+            route.properties = { ...route.properties, distance: lineDistance, ...this.styling.getLineStyles(lineDistance) }
 
             route.geometry.coordinates = arc
         })
@@ -111,7 +110,6 @@ class DataProcessor {
     }
 
     setOriginCapital(newOriginCapital) {
-        console.log(newOriginCapital)
         if (this.originCapital === newOriginCapital) {
             return false;
         }

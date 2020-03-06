@@ -44,6 +44,41 @@ class Stylings {
         [Stylings.DISTANCE_CATEROGY_NAMES.SHORT]: 0
     }
 
+    static ROUTE_STYLES = {
+        'paint': {
+            'line-width': [
+                'case',
+                ['boolean',
+                    ['feature-state', 'hover'],
+                    false
+                ],
+                10,
+                ['get', 'lineWidth'],
+            ],
+            'line-opacity': [
+                'case',
+                ['boolean',
+                    ['feature-state', 'hover'],
+                    false
+                ],
+                0.8,
+                1
+            ],
+            'line-color': ['get', 'color'],
+            //'line-color': '#007cbf'
+        },
+        'layout': {
+            'line-cap': "round"
+        }
+    }
+
+    static CAPITAL_ICON_STYLES = {
+        layout: {
+            'icon-image': 'airport-11',
+            'icon-allow-overlap': true
+        }
+    }
+
     theme = localStorage.getItem(Stylings.THEME_KEY) || Stylings.LIGHT_THEME;
 
     constructor(theme) {
@@ -61,7 +96,7 @@ class Stylings {
         localStorage.setItem(Stylings.THEME_KEY, themeName);
     }
 
-    getLineProperties(distance) {
+    getLineStyles(distance) {
         const categories = [
             Stylings.DISTANCE_CATEROGY_NAMES.LONG,
             Stylings.DISTANCE_CATEROGY_NAMES.UPPER_MEDIUM,
