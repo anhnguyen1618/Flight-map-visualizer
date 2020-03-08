@@ -86,7 +86,7 @@ export class MapWrapper {
         }
 
         this.map.flyTo({
-            center: centerCoordinates, speed: 0.2, easing: function (t) {
+            center: centerCoordinates, speed: 0.5, easing: function (t) {
                 return t;
             }
         });
