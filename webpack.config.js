@@ -1,13 +1,27 @@
 const path = require("path");
+const webpack = require('webpack');
 
 module.exports = {
     target: 'web',
-    entry: {
-        app: ["./src/scripts/index.js"]
-    },
+    entry: path.resolve(__dirname, 'src/scripts/index.js'),
     output: {
         path: path.resolve(__dirname, "static/"),
-        filename: "index.js"
+        filename: "[name].js"
+    },
+    optimization: {
+        minimize: true,
+
+        runtimeChunk: "single", // enable "runtime" chunk
+        splitChunks: {
+            cacheGroups: {
+                vendor: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: "vendor",
+                    chunks: "all"
+                }
+            }
+        }
+
     },
     module: {
         rules: [
@@ -31,7 +45,7 @@ module.exports = {
         contentBase: path.resolve(__dirname, "templates"),
         publicPath: '/static/',
         inline: true,
-        stats: 'errors-only',
+        hot: true,
         proxy: {
             '/capitals': {
                 target: 'http://127.0.0.1:5000/',

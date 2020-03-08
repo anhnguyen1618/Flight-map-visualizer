@@ -7,10 +7,10 @@ export class MapWrapper {
         this.styling = styling;
         this.dataProcessor = dataProcessor;
 
-        mapboxgl.accessToken = 'pk.eyJ1IjoiYW5obmd1eWVuNjI4MSIsImEiOiJjazdka3VsankxMTZ4M2dyd2NrMmRxdzVwIn0.GX9EDHs7fkf2DqEOaYBMSw';
+        mapboxgl.accessToken = 'pk.eyJ1IjoiYW5obmd1eWVuNjI4MSIsImEiOiJjazdpc3ZiOXkwajZkM2dwcnZiYmdycWpoIn0.miItHbnpDwLSnkbssDoQww';
         this.map = new mapboxgl.Map({
             container: 'map',
-            style: `mapbox://styles/mapbox/${styling.getTheme()}`,
+            style: `mapbox://styles/${styling.getTheme()}`,
             zoom: 2
         });
 
@@ -22,9 +22,8 @@ export class MapWrapper {
 
     changeTheme(theme) {
         const source = this.map.getSource('route');
-
         // automatic diff failed => force diff to false to rerender the entire map
-        this.map.setStyle(`mapbox://styles/mapbox/${theme}`, { diff: false });
+        this.map.setStyle(`mapbox://styles/${theme}`, { diff: false });
 
         const done = new Promise((resolve) => {
             this.map.on('styledata', function () {

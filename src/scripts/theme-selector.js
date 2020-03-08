@@ -3,6 +3,15 @@ import { Stylings } from './stylings.js';
 
 export class ThemeSelector {
     static themeChange(styling, callBack) {
+        $('#menu').html(
+            `
+            <input id="light" type="radio" name="rtoggle" value="${Stylings.LIGHT_THEME}" />
+            <label for="light">Light</label>
+            <input id="dark" type="radio" name="rtoggle" value="${Stylings.DARK_THEME}" />
+            <label for="dark">Dark</label>
+            `
+        );
+
         const themeSelectors = $('#menu input');
 
         themeSelectors.each((_, input) => {

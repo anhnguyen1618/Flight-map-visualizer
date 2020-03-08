@@ -1,8 +1,8 @@
 export class Stylings {
 
     static THEME_KEY = 'THEME';
-    static LIGHT_THEME = 'light-v10';
-    static DARK_THEME = 'dark-v10';
+    static LIGHT_THEME = 'mapbox/light-v10';
+    static DARK_THEME = 'anhnguyen6281/ck7ir19ij3qoo1inr3qhnowy5';
 
     static DISTANCE_CATEROGY_NAMES = {
         LONG: 'LONG',
@@ -25,7 +25,7 @@ export class Stylings {
         },
         [Stylings.DISTANCE_CATEROGY_NAMES.UPPER_MEDIUM]: {
             [Stylings.LIGHT_THEME]: '#1A237E',
-            [Stylings.DARK_THEME]: '#448aff'
+            [Stylings.DARK_THEME]: '#486af3'
         },
         [Stylings.DISTANCE_CATEROGY_NAMES.LOWER_MEDIUM]: {
             [Stylings.LIGHT_THEME]: '#00BFA5',
@@ -85,12 +85,12 @@ export class Stylings {
         }
     }
 
-    theme = localStorage.getItem(Stylings.THEME_KEY) || Stylings.LIGHT_THEME;
+    theme = localStorage.getItem(Stylings.THEME_KEY) || Stylings.DARK_THEME;
 
     highLightedCategory = '';
 
     constructor(theme) {
-        this.theme = theme ? theme : localStorage.getItem(Stylings.THEME_KEY) || Stylings.LIGHT_THEME;
+        this.theme = theme ? theme : localStorage.getItem(Stylings.THEME_KEY) || Stylings.DARK_THEME;
     }
 
     getTheme() {
