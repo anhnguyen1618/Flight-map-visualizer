@@ -6,3 +6,4 @@ export const DEFAULT_ZOOM_LEVEL = 2;
 export const FLY_TO_ANIMATION_SPEED = 0.5;
 export const DEFAULT_LINE_OPACITY = 1;
 export const UN_HIGHLIGHTED_LINE_OPACITY = 0.1;
+export const CAPITAL_JSON_URL = '/capitals';

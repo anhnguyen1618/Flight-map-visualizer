@@ -1,8 +1,18 @@
 import $ from 'jquery';
 import { Stylings } from './stylings.js';
 
-export class ThemeSelector {
-    static themeChange(styling, callBack) {
+export class DomHandler {
+
+    static subscribeAndReactToStyleChanges = (styling, mapWrapper) => () => {
+        DomHandler.themeOnChange(styling, theme => DomHandler.changeTheme(theme, styling, mapWrapper));
+
+        DomHandler.highlightedRoutesOnChange(styling, (category) => {
+            DomHandler.changeHighLightedRoutes(category, styling, mapWrapper)
+        });
+    }
+
+
+    static themeOnChange(styling, callBack) {
         $('#menu').html(
             `
             <input id="light" type="radio" name="theme" value="${Stylings.LIGHT_THEME}" />
@@ -18,15 +28,13 @@ export class ThemeSelector {
             input.checked = input.value === styling.getTheme();
         });
 
-        ThemeSelector.setDescription(styling.getTheme());
+        DomHandler.setDescription(styling.getTheme());
 
         themeSelectors.click(e => {
             const theme = e.target.value;
             if (theme === styling.getTheme()) {
                 return;
             }
-
-            ThemeSelector.setDescription(theme);
 
             callBack(theme);
         });
@@ -51,10 +59,9 @@ export class ThemeSelector {
         const header = `<h4 class="title">Min distance (km)</h4>`;
 
         $('#description').html(header + categoryDescription);
-        $('#reset-highlighed-color').html('<button id="reset-button">Reset highlight</button>');
     }
 
-    static colorHighlighterChange(styling, callBack) {
+    static highlightedRoutesOnChange(styling, callBack) {
         $('#reset-button').hide();
 
         $('#description').on('mouseenter', '.color-indicator', e => {
@@ -66,9 +73,22 @@ export class ThemeSelector {
             callBack(category);
         })
 
-        $('#reset-highlighed-color').on('click', '#reset-button', e => {
+        $('#reset-button').click(_ => {
             $('#reset-button').hide(200);
             callBack();
         })
+    }
+
+
+
+    static changeTheme(theme, styling, mapWrapper) {
+        DomHandler.setDescription(theme);
+        styling.setTheme(theme);
+        mapWrapper.changeTheme(theme);
+    }
+
+    static changeHighLightedRoutes(category, styling, mapWrapper) {
+        styling.setHighLightedCategory(category);
+        mapWrapper.highLightLines();
     }
 }

@@ -3,14 +3,12 @@ import $ from 'jquery';
 import { Stylings } from './stylings.js';
 import { DataProcessor } from './data-processor.js';
 import { MapWrapper } from './map-wrapper.js';
-import { ThemeSelector } from './theme-selector.js';
+import { DomHandler } from './dom-handler.js';
+import { CAPITAL_JSON_URL } from './constants.js';
 
 import '../styles/index.css';
 
-const CAPITAL_JSON_URL = '/capitals';
-
 function runApp() {
-    console.log("change hello worssd");
     const styling = new Stylings();
 
     const dataProcessor = new DataProcessor(CAPITAL_JSON_URL, styling);
@@ -18,19 +16,8 @@ function runApp() {
     const mapWrapper = new MapWrapper(styling, dataProcessor);
 
     mapWrapper.onLoad()
-        .then(() => {
-            ThemeSelector.themeChange(styling, theme => {
-                styling.setTheme(theme);
-                mapWrapper.changeTheme(theme);
-            });
-
-            ThemeSelector.colorHighlighterChange(styling, (category) => {
-                styling.setHighLightedCategory(category);
-                mapWrapper.highLightLines();
-            });
-        })
-
-
+        .then(DomHandler.subscribeAndReactToStyleChanges(styling, mapWrapper))
+        .catch(console.error);
 }
 
 $(document).ready(() => {
