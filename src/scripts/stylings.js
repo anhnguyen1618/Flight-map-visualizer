@@ -1,5 +1,4 @@
 export class Stylings {
-
     static THEME_KEY = 'THEME';
     static LIGHT_THEME = 'mapbox/light-v10';
     static DARK_THEME = 'anhnguyen6281/ck7ir19ij3qoo1inr3qhnowy5';
@@ -85,36 +84,36 @@ export class Stylings {
         }
     }
 
-    theme = localStorage.getItem(Stylings.THEME_KEY) || Stylings.DARK_THEME;
+    _theme = localStorage.getItem(Stylings.THEME_KEY) || Stylings.DARK_THEME;
 
     highLightedCategory = '';
 
     constructor(theme) {
-        this.theme = theme ? theme : localStorage.getItem(Stylings.THEME_KEY) || Stylings.DARK_THEME;
+        this._theme = theme ? theme : localStorage.getItem(Stylings.THEME_KEY) || Stylings.DARK_THEME;
     }
 
-    getTheme() {
-        return this.theme;
+    get theme() {
+        return this._theme;
     }
 
-    setTheme(themeName) {
-        this.theme = themeName;
+    set theme(themeName) {
+        this._theme = themeName;
         localStorage.setItem(Stylings.THEME_KEY, themeName);
     }
 
-    setHighLightedCategory(highLightedCategory) {
+    set highLightedCategory(highLightedCategory) {
         this.highLightedCategory = highLightedCategory;
     }
 
-    getHighLightedCategory() {
+    get highLightedCategory() {
         return this.highLightedCategory;
     }
 
-    getLineProperties(distance) {
+    getLineProperties = distance => {
         for (const category of Stylings.CATEGORY_NAMES_IN_DESC_ORDER) {
             if (distance >= Stylings.MIN_DISTANCE[category]) {
                 return {
-                    color: Stylings.COLORS[category][this.theme],
+                    color: Stylings.COLORS[category][this._theme],
                     lineWidth: Stylings.LINE_WIDTH[category],
                     category
                 };
@@ -123,11 +122,9 @@ export class Stylings {
 
 
         return {
-            color: Stylings.COLORS[Stylings.DISTANCE_CATEROGY_NAMES.SHORT][this.theme],
+            color: Stylings.COLORS[Stylings.DISTANCE_CATEROGY_NAMES.SHORT][this._theme],
             lineWidth: Stylings.LINE_WIDTH[Stylings.DISTANCE_CATEROGY_NAMES.SHORT],
             category
         };
     }
-
-
 }

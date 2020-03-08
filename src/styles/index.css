@@ -20,6 +20,7 @@ body {
     background: #fff;
     padding: 10px;
     z-index: 100;
+    transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 #description-box {
@@ -32,6 +33,7 @@ body {
     position: absolute;
     background: #fff;
     border-radius: 10px;
+    transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 #description .title {
@@ -80,4 +82,14 @@ body {
     border-color: #007bff;
     cursor: pointer;
     width: 100%;
-} 
+}
+
+.dark-theme #menu{
+    background-color: #282c34;
+    color: white;
+}
+
+.dark-theme #description-box {
+    background-color: #282c34;
+    color: white;
+}

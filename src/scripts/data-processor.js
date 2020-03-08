@@ -2,47 +2,82 @@ import * as turf from "@turf/turf";
 import { GreatCircle } from "arc";
 import $ from "jquery";
 
+import { NUMBER_OF_POINTS_ALONG_THE_LINE, DEFAULT_ORIGIN } from './constants.js';
+
 export class DataProcessor {
-    static DEFAULT_ORIGIN = 'Helsinki';
 
-    capitalData = [];
+    _capitalData = [];
 
-    nameToInfoMappings = {};
+    _nameToInfoMappings = {};
 
-    capitalPoints = {};
+    _capitalMarkers = {};
 
-    originCapital = DataProcessor.DEFAULT_ORIGIN;
+    _selectedCapital = DEFAULT_ORIGIN;
 
-    url = "/";
+    _url = "/hahah";
 
-    constructor(url, styling) {
-        this.url = url;
+    constructor(_url, styling) {
+        this._url = _url;
         this.styling = styling;
     }
 
-    load = _ => {
-        return new Promise((resolve, reject) => {
-            $.ajax({
-                type: 'GET',
-                url: this.url,
-                dataType: 'json',
-                success: (data) => {
-                    this.capitalData = data;
-                    this.computeCapitalPoints();
-                    this.buildMapFromCapitalNameToInfo();
-
-                    resolve();
-                },
-                error: () => {
-                    reject(`Capital data at "${this.url}" is not available`);
-                }
-            });
-        });
+    get selectedCapital() {
+        return this._selectedCapital;
     }
 
-    computeCapitalPoints() {
+    setSelectedCapital(newOriginCapital) {
+        if (this._selectedCapital === newOriginCapital) {
+            return false;
+        }
 
-        const features = this.capitalData.map((
+        this._selectedCapital = newOriginCapital;
+        return true;
+    }
+
+    get arcLinesFromSelectedCapital() {
+        const routes = this._computeStraightLineRoutes(this._selectedCapital);
+        this._addDistancesAndConvertStraightLineToArc(routes);
+        return routes;
+    }
+
+    get capitalMarkers() {
+        return this._capitalMarkers;
+    }
+
+    get selectedCapitalCoordinates() {
+        if (!this._nameToInfoMappings || !this._nameToInfoMappings[this._selectedCapital]) {
+            console.warn(`Origin capital not found!!!`);
+            return [];
+        }
+
+        const { CapitalLongitude: longitude, CapitalLatitude: latitude } = this._nameToInfoMappings[this._selectedCapital];
+
+        return [longitude, latitude];
+    }
+
+    load = _ => new Promise((resolve, reject) => {
+        $.ajax({
+            type: 'GET',
+            url: this._url,
+            dataType: 'json',
+            success: (data) => {
+                this._capitalData = data;
+                this._computeCapitalPoints();
+                this._buildMapFromCapitalNameToInfo();
+
+                resolve();
+            },
+            error: (err) => {
+                console.log(err)
+                reject(`Capital data at "${this._url}" is not available`);
+            }
+        });
+    });
+
+
+    _computeCapitalPoints = _ => {
+
+        const features = this._capitalData.map((
             { CapitalName: name,
                 CapitalLongitude: longitude,
                 CapitalLatitude: latitude,
@@ -60,37 +95,22 @@ export class DataProcessor {
             };
         });
 
-        this.capitalPoints = {
+        this._capitalMarkers = {
             type: 'FeatureCollection',
             features
         };
     }
 
-    getCapitalPoints() {
-        return this.capitalPoints;
-    }
-
-    buildMapFromCapitalNameToInfo() {
+    _buildMapFromCapitalNameToInfo = _ => {
         const index = {};
-        for (const capital of this.capitalData) {
+        for (const capital of this._capitalData) {
             index[capital.CapitalName] = capital;
         }
-        this.nameToInfoMappings = index;
+        this._nameToInfoMappings = index;
     }
 
-    getOriginCoordinates() {
-        if (!this.nameToInfoMappings || !this.nameToInfoMappings[this.originCapital]) {
-            console.warn(`Origin capital not found!!!`);
-            return [];
-        }
-
-        const { CapitalLongitude: longitude, CapitalLatitude: latitude } = this.nameToInfoMappings[this.originCapital];
-
-        return [longitude, latitude];
-    }
-
-    computeStraightLineRoutes(origin) {
-        const originInfo = this.nameToInfoMappings[origin];
+    _computeStraightLineRoutes = origin => {
+        const originInfo = this._nameToInfoMappings[origin];
         if (!originInfo) {
             return {
                 'type': 'FeatureCollection',
@@ -100,7 +120,7 @@ export class DataProcessor {
 
         return {
             'type': 'FeatureCollection',
-            'features': this.capitalData
+            'features': this._capitalData
                 .filter(({ CapitalName }) => CapitalName !== origin)
                 .map(({ CapitalName: name, CapitalLongitude: longitude, CapitalLatitude: latitude }, index) => {
                     return {
@@ -121,7 +141,7 @@ export class DataProcessor {
         };
     }
 
-    addDistancesAndConvertStraightLineToArc(routes) {
+    _addDistancesAndConvertStraightLineToArc = routes => {
         routes.features.forEach(route => {
             /**
              * Arc.js is used here to compute points along the arc as the method to draw arc at https://docs.mapbox.com/mapbox-gl-js/example/animate-point-along-route/
@@ -132,8 +152,6 @@ export class DataProcessor {
             const dest = { x: dstLong, y: dstLat };
             const generator = new GreatCircle(src, dest);
 
-
-            const NUMBER_OF_POINTS_ALONG_THE_LINE = 500;
             const line = generator.Arc(NUMBER_OF_POINTS_ALONG_THE_LINE);
             const lineDistance = turf.length(route, { units: 'kilometers' });
 
@@ -143,24 +161,5 @@ export class DataProcessor {
             route.geometry = line.json().geometry;
 
         });
-    }
-
-    getOriginCapital() {
-        return this.originCapital;
-    }
-
-    setOriginCapital(newOriginCapital) {
-        if (this.originCapital === newOriginCapital) {
-            return false;
-        }
-
-        this.originCapital = newOriginCapital;
-        return true;
-    }
-
-    getArcLinesFromOrigin() {
-        const routes = this.computeStraightLineRoutes(this.originCapital);
-        this.addDistancesAndConvertStraightLineToArc(routes);
-        return routes;
     }
 }

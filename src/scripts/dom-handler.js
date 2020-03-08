@@ -4,10 +4,10 @@ import { Stylings } from './stylings.js';
 export class DomHandler {
 
     static subscribeAndReactToStyleChanges = (styling, mapWrapper) => () => {
-        DomHandler.themeOnChange(styling, theme => DomHandler.changeTheme(theme, styling, mapWrapper));
+        DomHandler.themeOnChange(styling, theme => DomHandler._changeTheme(theme, styling, mapWrapper));
 
-        DomHandler.highlightedRoutesOnChange(styling, (category) => {
-            DomHandler.changeHighLightedRoutes(category, styling, mapWrapper)
+        DomHandler._highlightedRoutesOnChange(styling, (category) => {
+            DomHandler._changeHighLightedRoutes(category, styling, mapWrapper)
         });
     }
 
@@ -24,15 +24,17 @@ export class DomHandler {
 
         const themeSelectors = $('#menu input');
 
+        const defaultTheme = styling.theme;
+
         themeSelectors.each((_, input) => {
-            input.checked = input.value === styling.getTheme();
+            input.checked = input.value === defaultTheme;
         });
 
-        DomHandler.setDescription(styling.getTheme());
+        DomHandler._setThemeColors(defaultTheme);
 
         themeSelectors.click(e => {
             const theme = e.target.value;
-            if (theme === styling.getTheme()) {
+            if (theme === styling.theme) {
                 return;
             }
 
@@ -40,7 +42,18 @@ export class DomHandler {
         });
     }
 
-    static setDescription(theme) {
+    static _setThemeColors(theme) {
+
+        if (theme === Stylings.DARK_THEME) {
+            $('#content').addClass("dark-theme");
+        } else {
+            $('#content').removeClass("dark-theme");
+        }
+
+        DomHandler._setDescription(theme);
+    }
+
+    static _setDescription(theme) {
         const categoryDescription = Stylings.CATEGORY_NAMES_IN_DESC_ORDER.map((categoryName, index) => {
             const minDistance = Stylings.MIN_DISTANCE[categoryName];
             const prevMinDistance = index >= 1 ? Stylings.MIN_DISTANCE[Stylings.CATEGORY_NAMES_IN_DESC_ORDER[index - 1]] : "";
@@ -61,13 +74,13 @@ export class DomHandler {
         $('#description').html(header + categoryDescription);
     }
 
-    static highlightedRoutesOnChange(styling, callBack) {
+    static _highlightedRoutesOnChange(styling, callBack) {
         $('#reset-button').hide();
 
         $('#description').on('mouseenter', '.color-indicator', e => {
             $('#reset-button').show(200);
             const category = e.target.id;
-            if (category === styling.getHighLightedCategory()) {
+            if (category === styling.highLightedCategory) {
                 return;
             }
             callBack(category);
@@ -79,16 +92,14 @@ export class DomHandler {
         })
     }
 
-
-
-    static changeTheme(theme, styling, mapWrapper) {
-        DomHandler.setDescription(theme);
-        styling.setTheme(theme);
+    static _changeTheme(theme, styling, mapWrapper) {
+        DomHandler._setThemeColors(theme);
+        styling.theme = theme;
         mapWrapper.changeTheme(theme);
     }
 
-    static changeHighLightedRoutes(category, styling, mapWrapper) {
-        styling.setHighLightedCategory(category);
+    static _changeHighLightedRoutes(category, styling, mapWrapper) {
+        styling.highLightedCategory = category;
         mapWrapper.highLightLines();
     }
 }

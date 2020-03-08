@@ -17,7 +17,7 @@ export class MapWrapper {
         mapboxgl.accessToken = ACCESS_TOKEN;
         this.map = new mapboxgl.Map({
             container: 'map',
-            style: `${PREFIX_STYLE_URL}${styling.getTheme()}`,
+            style: `${PREFIX_STYLE_URL}${styling.theme}`,
             zoom: DEFAULT_ZOOM_LEVEL
         });
 
@@ -25,9 +25,30 @@ export class MapWrapper {
 
         this.onLoad()
             .then(this.dataProcessor.load)
-            .then(this.render)
-            .catch(alert);
+            .then(this._render)
+            .catch(error => {
+                console.error(error);
+                alert(error);
+            });
     }
+
+    _swallowNullMap = f => (...args) => {
+        if (!this.map) {
+            notify("Map not found");
+            return;
+        }
+        f(...args);
+    }
+
+    _swallowNullPopup = f => (...args) => {
+        if (!this.popup) {
+            notify("Popup not found");
+            return;
+        }
+        f(...args);
+    }
+
+    _swallowNullMapAndPopup = f => this._swallowNullMap(this._swallowNullPopup(f))
 
     onLoad = _ => new Promise((resolve, reject) => {
         if (!this.map) {
@@ -47,67 +68,7 @@ export class MapWrapper {
         })
     })
 
-    swallowNullMap = f => (...args) => {
-        if (!this.map) {
-            notify("Map not found");
-            return;
-        }
-        f(...args);
-    }
-
-    swallowNullPopup = f => (...args) => {
-        if (!this.popup) {
-            notify("Popup not found");
-            return;
-        }
-        f(...args);
-    }
-
-    swallowNullMapAndPopup = f => this.swallowNullMap(this.swallowNullPopup(f))
-
-
-    render = _ => {
-        this.initFlightMap();
-
-        this.map.on('mouseenter', 'capitals', this.displayCapitalInfoPopup);
-        this.map.on('mouseleave', 'capitals', this.hideCapitalInfoPopup);
-        this.map.on('click', 'capitals', this.displayAllFlightsFromChosenCapital);
-        const { highLightRoute, unHighLightRoute } = this.getRouteHoverHandler();
-        this.map.on('mouseenter', 'route', highLightRoute);
-        this.map.on('mouseleave', 'route', unHighLightRoute);
-    }
-
-    initFlightMap = _ => {
-        this.moveCenterTo(this.dataProcessor.getOriginCoordinates());
-        const routes = this.dataProcessor.getArcLinesFromOrigin();
-        this.addSourceAndLayers(routes);
-    }
-
-    addSourceAndLayers = this.swallowNullMap(routes => {
-        this.map.addLayer({
-            id: 'capitals',
-            type: 'symbol',
-            source: {
-                type: 'geojson',
-                data: this.dataProcessor.getCapitalPoints()
-            },
-            ...Stylings.CAPITAL_ICON_STYLES
-        });
-
-        this.map.addSource('route', {
-            'type': 'geojson',
-            'data': routes
-        });
-
-        this.map.addLayer({
-            'id': 'route',
-            'source': 'route',
-            'type': 'line',
-            ...Stylings.ROUTE_STYLES
-        });
-    });
-
-    changeTheme = this.swallowNullMap(theme => {
+    changeTheme = this._swallowNullMap(theme => {
         // Preserve the state of the source before setting style as the state is lost after the setStyle() is called
         const prevRouteSource = this.map.getSource('route');
         if (!prevRouteSource || !prevRouteSource._data || !prevRouteSource._data.features) {
@@ -125,45 +86,16 @@ export class MapWrapper {
                 const { distance } = feature.properties;
                 feature.properties = { ...feature.properties, ...this.styling.getLineProperties(distance) };
             });
-            this.addSourceAndLayers(routesInfo);
+            this._addSourceAndLayers(routesInfo);
 
             // Preserve the highlighted route category after changing theme
-            const prevHighlightedCategory = this.styling.getHighLightedCategory();
+            const prevHighlightedCategory = this.styling.highLightedCategory;
             this.highLightLines(prevHighlightedCategory);
         });
     })
 
-    replaceOrigin = this.swallowNullMap(newOrigin => {
-        if (!this.dataProcessor.setOriginCapital(newOrigin)) {
-            return;
-        }
-
-        const routeSource = this.map.getSource('route');
-        if (!routeSource) {
-            notify("Route source is not found")
-            return;
-        }
-
-
-        const arcs = this.dataProcessor.getArcLinesFromOrigin();
-        routeSource.setData(arcs);
-    })
-
-    moveCenterTo = this.swallowNullMap((centerCoordinates) => {
-        if (!centerCoordinates || centerCoordinates.length < 2) {
-            notify("Center coordinates are invalid!!!");
-            return;
-        }
-
-        this.map.flyTo({
-            center: centerCoordinates,
-            speed: FLY_TO_ANIMATION_SPEED,
-            easing: t => t
-        });
-    })
-
-    highLightLines = this.swallowNullMap(() => {
-        const highlightedCategory = this.styling.getHighLightedCategory();
+    highLightLines = this._swallowNullMap(() => {
+        const highlightedCategory = this.styling.highLightedCategory;
 
         // Reset line opacity of route when there is no highlighted category
         if (!highlightedCategory) {
@@ -185,8 +117,77 @@ export class MapWrapper {
     })
 
 
+    _render = _ => {
+        this._initFlightMap();
 
-    displayCapitalInfoPopup = this.swallowNullMapAndPopup(({ features }) => {
+        this.map.on('mouseenter', 'capitals', this._displayCapitalInfoPopup);
+        this.map.on('mouseleave', 'capitals', this._hideCapitalInfoPopup);
+        this.map.on('click', 'capitals', this._displayAllFlightsFromChosenCapital);
+        const { highLightRoute, unHighLightRoute } = this._getRouteHoverHandler();
+        this.map.on('mouseenter', 'route', highLightRoute);
+        this.map.on('mouseleave', 'route', unHighLightRoute);
+    }
+
+    _initFlightMap = _ => {
+        this._moveCenterTo(this.dataProcessor.selectedCapitalCoordinates);
+        const routes = this.dataProcessor.arcLinesFromSelectedCapital;
+        this._addSourceAndLayers(routes);
+    }
+
+    _addSourceAndLayers = this._swallowNullMap(routes => {
+        this.map.addLayer({
+            id: 'capitals',
+            type: 'symbol',
+            source: {
+                type: 'geojson',
+                data: this.dataProcessor.capitalMarkers
+            },
+            ...Stylings.CAPITAL_ICON_STYLES
+        });
+
+        this.map.addSource('route', {
+            'type': 'geojson',
+            'data': routes
+        });
+
+        this.map.addLayer({
+            'id': 'route',
+            'source': 'route',
+            'type': 'line',
+            ...Stylings.ROUTE_STYLES
+        });
+    });
+
+    _replaceOrigin = this._swallowNullMap(newOrigin => {
+        if (!this.dataProcessor.setSelectedCapital(newOrigin)) {
+            return;
+        }
+
+        const routeSource = this.map.getSource('route');
+        if (!routeSource) {
+            notify("Route source is not found")
+            return;
+        }
+
+
+        const arcs = this.dataProcessor.arcLinesFromSelectedCapital;
+        routeSource.setData(arcs);
+    })
+
+    _moveCenterTo = this._swallowNullMap((centerCoordinates) => {
+        if (!centerCoordinates || centerCoordinates.length < 2) {
+            notify("Center coordinates are invalid!!!");
+            return;
+        }
+
+        this.map.flyTo({
+            center: centerCoordinates,
+            speed: FLY_TO_ANIMATION_SPEED,
+            easing: t => t
+        });
+    })
+
+    _displayCapitalInfoPopup = this._swallowNullMapAndPopup(({ features }) => {
 
         if (!features.length) {
             this.popup.remove();
@@ -201,26 +202,24 @@ export class MapWrapper {
         this.map.getCanvas().style.cursor = features.length ? 'pointer' : '';
     })
 
-    hideCapitalInfoPopup = this.swallowNullMapAndPopup(_ => {
+    _hideCapitalInfoPopup = this._swallowNullMapAndPopup(_ => {
         this.map.getCanvas().style.cursor = '';
         this.popup.remove();
     })
 
-    displayAllFlightsFromChosenCapital = ({ features }) => {
+    _displayAllFlightsFromChosenCapital = ({ features }) => {
         if (!features.length) {
             return;
         }
         const feature = features[0];
-        this.moveCenterTo(feature.geometry.coordinates);
-        this.replaceOrigin(feature.properties.Name);
+        this._moveCenterTo(feature.geometry.coordinates);
+        this._replaceOrigin(feature.properties.Name);
     }
 
-
-
-    getRouteHoverHandler = _ => {
+    _getRouteHoverHandler = _ => {
         let hoverId = null;
 
-        const highLightRoute = this.swallowNullMapAndPopup(({ features, lngLat }) => {
+        const highLightRoute = this._swallowNullMapAndPopup(({ features, lngLat }) => {
             if (!features.length) {
                 this.popup.remove();
                 return;
@@ -228,7 +227,9 @@ export class MapWrapper {
             const feature = features[0];
 
             this.popup.setLngLat(lngLat.toArray())
-                .setHTML(`<h3>Distance ${feature.properties.origin} - ${this.dataProcessor.getOriginCapital()}: </h3> <p> ${feature.properties.distance} km </p>`)
+                .setHTML(`
+                <h3>Distance ${feature.properties.origin} - ${this.dataProcessor.selectedCapital}: </h3>
+                <p> ${feature.properties.distance} km </p>`)
                 .addTo(this.map);
 
             hoverId = feature.id;
@@ -238,17 +239,7 @@ export class MapWrapper {
             );
         });
 
-        const unHighLightRoute = this.swallowNullMapAndPopup(_ => {
-            if (!this.map) {
-                notify("Map is unavailable")
-                return;
-            }
-
-            if (!this.popup) {
-                notify("Popup is not found")
-                return;
-            }
-
+        const unHighLightRoute = this._swallowNullMapAndPopup(_ => {
             if (hoverId !== null) {
                 this.map.getCanvas().style.cursor = '';
                 this.popup.remove();
@@ -265,7 +256,4 @@ export class MapWrapper {
             unHighLightRoute
         }
     }
-
-
-
 }
