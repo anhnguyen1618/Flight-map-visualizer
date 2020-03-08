@@ -20,7 +20,7 @@ export class DataProcessor {
         this.styling = styling;
     }
 
-    load() {
+    load = _ => {
         return new Promise((resolve, reject) => {
             $.ajax({
                 type: 'GET',

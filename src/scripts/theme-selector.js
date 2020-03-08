@@ -5,9 +5,9 @@ export class ThemeSelector {
     static themeChange(styling, callBack) {
         $('#menu').html(
             `
-            <input id="light" type="radio" name="rtoggle" value="${Stylings.LIGHT_THEME}" />
+            <input id="light" type="radio" name="theme" value="${Stylings.LIGHT_THEME}" />
             <label for="light">Light</label>
-            <input id="dark" type="radio" name="rtoggle" value="${Stylings.DARK_THEME}" />
+            <input id="dark" type="radio" name="theme" value="${Stylings.DARK_THEME}" />
             <label for="dark">Dark</label>
             `
         );
@@ -51,6 +51,7 @@ export class ThemeSelector {
         const header = `<h4 class="title">Min distance (km)</h4>`;
 
         $('#description').html(header + categoryDescription);
+        $('#reset-highlighed-color').html('<button id="reset-button">Reset highlight</button>');
     }
 
     static colorHighlighterChange(styling, callBack) {
@@ -65,7 +66,7 @@ export class ThemeSelector {
             callBack(category);
         })
 
-        $('#reset-button').click(e => {
+        $('#reset-highlighed-color').on('click', '#reset-button', e => {
             $('#reset-button').hide(200);
             callBack();
         })

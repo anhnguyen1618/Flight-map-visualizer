@@ -17,15 +17,20 @@ function runApp() {
 
     const mapWrapper = new MapWrapper(styling, dataProcessor);
 
-    ThemeSelector.themeChange(styling, theme => {
-        styling.setTheme(theme);
-        mapWrapper.changeTheme(theme);
-    });
+    mapWrapper.onLoad()
+        .then(() => {
+            ThemeSelector.themeChange(styling, theme => {
+                styling.setTheme(theme);
+                mapWrapper.changeTheme(theme);
+            });
 
-    ThemeSelector.colorHighlighterChange(styling, (category) => {
-        styling.setHighLightedCategory(category);
-        mapWrapper.highLightLines();
-    });
+            ThemeSelector.colorHighlighterChange(styling, (category) => {
+                styling.setHighLightedCategory(category);
+                mapWrapper.highLightLines();
+            });
+        })
+
+
 }
 
 $(document).ready(() => {
