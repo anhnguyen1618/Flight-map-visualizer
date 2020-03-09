@@ -1,0 +1,11 @@
+#!/bin/bash
+
+CONTAINER_ID=mapbox_front-end_1
+
+running=$(docker inspect -f {{.State.Running}} $CONTAINER_ID)
+if [ "$running" == "false" ]; then
+	echo "Please start docker environment first (docker-compose up)"
+	exit
+fi
+
+docker exec -it $CONTAINER_ID npm run $@

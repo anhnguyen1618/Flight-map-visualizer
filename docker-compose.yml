@@ -16,6 +16,8 @@ services:
         build:
             context: .
             dockerfile: ./docker-files/Dockerfile-back-end
+        environment:
+            - DEVELOPMENT_MODE=true
         ports:
             - "5000:5000"
         volumes:

@@ -1,7 +1,11 @@
 from flask import Flask, render_template, request, abort
 import json
+import os
 
+# Source http://techslides.com/list-of-countries-and-capitals
 CAPITAL_JSON_FILE_NAME = 'capitals.json'
+
+debug = os.getenv('DEVELOPMENT_MODE', False)
 
 app = Flask(__name__)
 
@@ -17,4 +21,4 @@ def capitals():
         return json.dumps(data)
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000, host="0.0.0.0")
+    app.run(debug=debug, port=5000, host="0.0.0.0")

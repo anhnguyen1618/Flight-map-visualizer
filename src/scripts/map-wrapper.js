@@ -6,7 +6,6 @@ import {
     FLY_TO_ANIMATION_SPEED
 } from './constants.js';
 import { notify } from './utils.js';
-import { DataProcessor } from './data-processor.js';
 
 /**
  * Wrapper around map to encapsulate map manipulation api
@@ -98,9 +97,9 @@ export class MapWrapper {
         }
 
         this._map.once('load', () => {
-            this._isLoaded = true
+            this._isLoaded = true;
             resolve(true);
-        })
+        });
     })
 
     /**
@@ -278,7 +277,7 @@ export class MapWrapper {
         const feature = features[0];
 
         this._popup.setLngLat(feature.geometry.coordinates)
-            .setHTML(`<h3>${feature.properties.Name}</h3> <p> ${feature.properties.Description} </p>`)
+            .setHTML(`<h3>${feature.properties.capitalName}</h3> <p> ${feature.properties.capitalDescription} </p>`)
             .addTo(this._map);
 
         this._map.getCanvas().style.cursor = 'pointer';
@@ -307,7 +306,7 @@ export class MapWrapper {
         }
         const {
             geometry: { coordinates: capitalCoordinates },
-            properties: { Name: capitalName }
+            properties: { capitalName }
         } = features[0];
         this._moveCenterTo(capitalCoordinates);
         this._replaceSelectedCapital(capitalName);
@@ -326,7 +325,7 @@ export class MapWrapper {
 
         const routeSource = this._map.getSource('route');
         if (!routeSource) {
-            notify("Route source is not found")
+            notify("Route source is not found");
             return;
         }
 
@@ -367,7 +366,7 @@ export class MapWrapper {
             );
         });
 
-        const unHighLightOneSpecificRoute = this._swallowNullMapAndPopup(_ => {
+        const unHighLightOneSpecificRoute = this._swallowNullMapAndPopup(() => {
             if (hoverId !== null) {
                 this._map.getCanvas().style.cursor = '';
                 this._popup.remove();

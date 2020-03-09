@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint src/scripts/**",
     "dev": "webpack-dev-server --hot",
-    "build": "webpack --config webpack.config.js --mode production",
+    "build": "webpack --mode production",
     "test": "jest"
   },
   "author": "",

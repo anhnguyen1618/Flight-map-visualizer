@@ -79,7 +79,7 @@ describe('Map wrapper test', () => {
         expect(mockComputeStraightRoutes).toHaveBeenCalledWith("Helsinki");
         expect(dataProcessor._addDistancesAndConvertStraightLineToArc).toHaveBeenCalled();
 
-        expect(result).toEqual(routes)
+        expect(result).toEqual(routes);
     });
 
     test('load data from server', () => {
@@ -111,8 +111,8 @@ describe('Map wrapper test', () => {
                 {
                     type: 'Feature',
                     properties: {
-                        Name: "Saint Helier",
-                        Description: "Capital of Jersey"
+                        capitalName: "Saint Helier",
+                        capitalDescription: "Capital of Jersey"
                     },
                     geometry: {
                         type: 'Point',
@@ -122,14 +122,14 @@ describe('Map wrapper test', () => {
                 {
                     type: 'Feature',
                     properties: {
-                        Name: "Amman",
-                        Description: "Capital of Jordan"
+                        capitalName: "Amman",
+                        capitalDescription: "Capital of Jordan"
                     },
                     geometry: {
                         type: 'Point',
                         coordinates: [35.933333, 31.95]
                     }
-                },
+                }
             ]
         };
 

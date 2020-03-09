@@ -16,7 +16,7 @@ export class DomHandler {
         DomHandler.themeOnChange(styling, theme => DomHandler._changeTheme(theme, styling, mapWrapper));
 
         DomHandler._highlightedRoutesOnChange(styling, (category) => {
-            DomHandler._changeHighLightedRoutes(category, styling, mapWrapper)
+            DomHandler._changeHighLightedRoutes(category, styling, mapWrapper);
         });
 
         DomHandler.showThemeSelectorAndDescription();
@@ -121,12 +121,12 @@ export class DomHandler {
                 return;
             }
             callBack(category);
-        })
+        });
 
-        $('#reset-button').click(_ => {
+        $('#reset-button').click(() => {
             $('#reset-button').hide(200);
             callBack();
-        })
+        });
     }
 
     /**

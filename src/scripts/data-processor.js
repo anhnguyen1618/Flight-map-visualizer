@@ -3,7 +3,6 @@ import { GreatCircle } from "arc";
 import $ from "jquery";
 
 import { NUMBER_OF_POINTS_ALONG_THE_LINE, DEFAULT_ORIGIN } from './constants.js';
-import { Stylings } from "./stylings.js";
 import { notify } from "./utils.js";
 
 /**
@@ -132,7 +131,7 @@ export class DataProcessor {
                 resolve();
             },
             error: (err) => {
-                console.error(err)
+                console.error(err);
                 reject(`Capital data at "${this._url}" is not available`);
             }
         });
@@ -150,12 +149,12 @@ export class DataProcessor {
                 CapitalName: name,
                 CapitalLongitude: longitude,
                 CapitalLatitude: latitude,
-                CountryName } = capitalInfo
+                CountryName } = capitalInfo;
             return {
                 type: 'Feature',
                 properties: {
-                    Name: name,
-                    Description: `Capital of ${CountryName}`
+                    capitalName: name,
+                    capitalDescription: `Capital of ${CountryName}`
                 },
                 geometry: {
                     type: 'Point',

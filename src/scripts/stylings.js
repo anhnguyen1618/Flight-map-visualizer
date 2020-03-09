@@ -200,7 +200,7 @@ export class Stylings {
         return {
             color: Stylings.COLORS[Stylings.DISTANCE_CATEROGY_NAMES.SHORT][this._theme],
             lineWidth: Stylings.LINE_WIDTH[Stylings.DISTANCE_CATEROGY_NAMES.SHORT],
-            category
+            category: Stylings.DISTANCE_CATEROGY_NAMES.SHORT
         };
     }
 

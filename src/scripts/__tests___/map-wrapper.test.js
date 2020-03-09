@@ -15,11 +15,11 @@ jest.mock('mapbox-gl/dist/mapbox-gl.js', () => {
     mockMapConstructor = mapConstructor;
     mockPopupConstructor = popupConstructor;
 
-    mapConstructor.mockReturnValue({})
+    mapConstructor.mockReturnValue({});
     return {
         Map: mapConstructor,
         Popup: mockPopupConstructor
-    }
+    };
 });
 
 jest.mock('../data-processor.js');
@@ -59,7 +59,7 @@ describe('Map wrapper test', () => {
         mapWrapper._map.once = (keyword, callBack) => {
             expect(keyword).toBe("load");
             callBack();
-        }
+        };
 
         mapWrapper.onLoad()
             .then(result => expect(result).toBeTruthy());
@@ -123,16 +123,16 @@ describe('Map wrapper test', () => {
             _data: {
                 features: [
                     {
-                        properties: { distance: 500 },
+                        properties: { distance: 500 }
                     },
                     {
-                        properties: { distance: 7000 },
+                        properties: { distance: 7000 }
                     },
                     {
-                        properties: { distance: 15000 },
+                        properties: { distance: 15000 }
                     },
                     {
-                        properties: { distance: 4000 },
+                        properties: { distance: 4000 }
                     }
                 ]
             }
@@ -300,14 +300,14 @@ describe('Map wrapper test', () => {
                     coordinates: [1, 2]
                 },
                 properties: {
-                    Name: "Helsinki",
-                    Description: "Capital of Finland"
+                    capitalName: "Helsinki",
+                    capitalDescription: "Capital of Finland"
                 }
             }]
         });
 
         expect(mockSetLngLat).toHaveBeenCalled();
-        expect(mockSetLngLat.mock.calls[0][0]).toEqual([1, 2])
+        expect(mockSetLngLat.mock.calls[0][0]).toEqual([1, 2]);
         expect(mockSetHTML).toHaveBeenCalled();
         expect(mockSetHTML.mock.calls[0][0]).toEqual(`<h3>Helsinki</h3> <p> Capital of Finland </p>`);
         expect(cursorObj.cursor).toBe("pointer");
@@ -337,8 +337,8 @@ describe('Map wrapper test', () => {
                     coordinates: [1, 2]
                 },
                 properties: {
-                    Name: "Helsinki",
-                    Description: "Capital of Finland"
+                    capitalName: "Helsinki",
+                    capitalDescription: "Capital of Finland"
                 }
             }]
         });
