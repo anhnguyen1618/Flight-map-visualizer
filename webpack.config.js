@@ -42,14 +42,19 @@ module.exports = {
         ]
     },
     devServer: {
+        host: '0.0.0.0',
+        port: 8080,
         contentBase: path.resolve(__dirname, "templates"),
         publicPath: '/static/',
         inline: true,
         hot: true,
         proxy: {
             '/capitals': {
-                target: 'http://127.0.0.1:5000/',
-                secure: false
+                target: {
+                    host: "back-end",
+                    protocol: 'http:',
+                    port: 5000
+                }
             }
         }
     }

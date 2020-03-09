@@ -1,0 +1,22 @@
+version: '2.0'
+
+services:
+    front-end:
+        build:
+            context: .
+            dockerfile: ./docker-files/Dockerfile-front-end
+        ports:
+            - "8080:8080"
+        volumes:
+            - .:/app
+        depends_on:
+            - back-end
+
+    back-end:
+        build:
+            context: .
+            dockerfile: ./docker-files/Dockerfile-back-end
+        ports:
+            - "5000:5000"
+        volumes:
+            - .:/app

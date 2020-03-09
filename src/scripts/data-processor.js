@@ -132,7 +132,7 @@ export class DataProcessor {
                 resolve();
             },
             error: (err) => {
-                console.log(err)
+                console.error(err)
                 reject(`Capital data at "${this._url}" is not available`);
             }
         });
