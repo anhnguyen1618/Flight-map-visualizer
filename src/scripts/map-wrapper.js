@@ -65,11 +65,43 @@ export class MapWrapper {
 
         this._popup = new mapboxgl.Popup();
 
+        this.loadDataAndRender();
+    }
+
+    /**
+     * Load map, fetch data from back-end and render markers/lines
+     * @returns {void}
+     * @public
+     */
+    loadDataAndRender() {
         this.onLoad()
             .then(this.dataProcessor.load)
             .then(this._initialRender)
             .catch(notify);
     }
+
+    /**
+     * Wait for map to be initially loaded
+     * @returns {Promise<Boolean>} promise to wait for map to be loaded
+     * @public
+     */
+    onLoad = () => new Promise((resolve, reject) => {
+        if (!this._map) {
+            notify("Map not found");
+            reject(false);
+            return;
+        }
+
+        if (this._isLoaded) {
+            resolve(true);
+            return;
+        }
+
+        this._map.once('load', () => {
+            this._isLoaded = true
+            resolve(true);
+        })
+    })
 
     /**
      * Function decorator that wrap callBack function and check if map is null before calling callBack function  
@@ -108,29 +140,6 @@ export class MapWrapper {
     _swallowNullMapAndPopup = callBack => this._swallowNullMap(this._swallowNullPopup(callBack))
 
     /**
-     * Wait for map to be initially loaded
-     * @returns {Promise<Boolean>} promise to wait for map to be loaded
-     * @public
-     */
-    onLoad = () => new Promise((resolve, reject) => {
-        if (!this._map) {
-            notify("Map not found");
-            reject(false);
-            return;
-        }
-
-        if (this._isLoaded) {
-            resolve(true);
-            return;
-        }
-
-        this._map.once('load', _ => {
-            this._isLoaded = true
-            resolve(true);
-        })
-    })
-
-    /**
      * Change theme style and add sources and layers again
      * @param {string} theme Id of the selected theme
      * @returns {void}
@@ -147,7 +156,7 @@ export class MapWrapper {
         // automatic style diff failed => force diff to false to rerender the entire map
         this._map.setStyle(`${PREFIX_STYLE_URL}${theme}`, { diff: false });
 
-        this._map.once('styledata', _ => {
+        this._map.once('styledata', () => {
             const routesInfo = prevRouteSource._data;
             // Recompute styles for lines based on theme state in this.styling
             routesInfo.features.forEach(feature => {

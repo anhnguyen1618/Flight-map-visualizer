@@ -90,7 +90,7 @@ export class Stylings {
 
     _theme = localStorage.getItem(Stylings.THEME_KEY) || Stylings.DARK_THEME;
 
-    highLightedCategory = '';
+    _highLightedCategory = '';
 
     constructor(theme) {
         this._theme = theme ? theme : localStorage.getItem(Stylings.THEME_KEY) || Stylings.DARK_THEME;
@@ -106,11 +106,11 @@ export class Stylings {
     }
 
     set highLightedCategory(highLightedCategory) {
-        this.highLightedCategory = highLightedCategory;
+        this._highLightedCategory = highLightedCategory;
     }
 
     get highLightedCategory() {
-        return this.highLightedCategory;
+        return this._highLightedCategory;
     }
 
     getLineProperties = distance => {
