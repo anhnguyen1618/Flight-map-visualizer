@@ -260,4 +260,117 @@ describe('Map wrapper test', () => {
         });
     });
 
+    test("Test move center to", () => {
+        mapWrapper._map.flyTo = jest.fn();
+        mapWrapper._moveCenterTo([23]);
+        expect(mapWrapper._map.flyTo).not.toHaveBeenCalled();
+
+        mapWrapper._moveCenterTo([23, 40]);
+        expect(mapWrapper._map.flyTo).toHaveBeenCalled();
+        expect(mapWrapper._map.flyTo.mock.calls[0][0].center).toEqual([23, 40]);
+    });
+
+    test('Test display capital info popup', () => {
+        const mockRemove = jest.fn();
+        const mockSetLngLat = jest.fn();
+        const mockSetHTML = jest.fn();
+        const mockAddTo = jest.fn();
+        mockSetLngLat.mockReturnValue({ setHTML: mockSetHTML });
+        mockSetHTML.mockReturnValue({ addTo: mockAddTo });
+
+        mapWrapper._popup = {
+            remove: mockRemove,
+            setLngLat: mockSetLngLat
+        };
+
+        const cursorObj = { cursor: '' };
+
+        mapWrapper._map = {
+            getCanvas: () => ({
+                style: cursorObj
+            })
+        };
+
+        mapWrapper._displayCapitalInfoPopup({ features: [] });
+        expect(mockRemove).toHaveBeenCalled();
+
+        mapWrapper._displayCapitalInfoPopup({
+            features: [{
+                geometry: {
+                    coordinates: [1, 2]
+                },
+                properties: {
+                    Name: "Helsinki",
+                    Description: "Capital of Finland"
+                }
+            }]
+        });
+
+        expect(mockSetLngLat).toHaveBeenCalled();
+        expect(mockSetLngLat.mock.calls[0][0]).toEqual([1, 2])
+        expect(mockSetHTML).toHaveBeenCalled();
+        expect(mockSetHTML.mock.calls[0][0]).toEqual(`<h3>Helsinki</h3> <p> Capital of Finland </p>`);
+        expect(cursorObj.cursor).toBe("pointer");
+    });
+
+    test("test hide capital info popup", () => {
+        const cursorObj = { cursor: 'test' };
+        mapWrapper._map = {
+            getCanvas: () => ({
+                style: cursorObj
+            })
+        };
+
+        mapWrapper._popup.remove = jest.fn();
+        mapWrapper._hideCapitalInfoPopup();
+
+        expect(cursorObj.cursor).toBe("");
+        expect(mapWrapper._popup.remove).toHaveBeenCalled();
+    });
+
+    test("test display all flights from chosen capital", () => {
+        mapWrapper._moveCenterTo = jest.fn();
+        mapWrapper._replaceSelectedCapital = jest.fn();
+        mapWrapper._displayAllFlightsFromChosenCapital({
+            features: [{
+                geometry: {
+                    coordinates: [1, 2]
+                },
+                properties: {
+                    Name: "Helsinki",
+                    Description: "Capital of Finland"
+                }
+            }]
+        });
+
+        expect(mapWrapper._moveCenterTo).toHaveBeenCalled();
+        expect(mapWrapper._moveCenterTo.mock.calls[0][0]).toEqual([1, 2]);
+        expect(mapWrapper._replaceSelectedCapital).toHaveBeenCalledWith("Helsinki");
+    });
+
+    test("test replace selected capital", () => {
+        dataProcessor.setSelectedCapital = jest.fn();
+        dataProcessor.setSelectedCapital.mockReturnValue(true);
+        dataProcessor.arcLinesFromSelectedCapital = {
+            'type': 'FeatureCollection',
+            'features': []
+        };
+
+        mapWrapper._map.getSource = jest.fn();
+        const mockSetData = jest.fn();
+        mapWrapper._map.getSource.mockReturnValue({
+            setData: mockSetData
+        });
+
+        mapWrapper._replaceSelectedCapital("Washinton D.C");
+
+        expect(mapWrapper._map.getSource).toHaveBeenCalledWith("route");
+
+        expect(mockSetData).toHaveBeenCalled();
+        expect(mockSetData.mock.calls[0][0]).toEqual({
+            'type': 'FeatureCollection',
+            'features': []
+        });
+    });
+
 });

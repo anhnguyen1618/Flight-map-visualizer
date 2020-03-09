@@ -281,16 +281,16 @@ export class MapWrapper {
             .setHTML(`<h3>${feature.properties.Name}</h3> <p> ${feature.properties.Description} </p>`)
             .addTo(this._map);
 
-        this._map.getCanvas().style.cursor = features.length ? 'pointer' : '';
+        this._map.getCanvas().style.cursor = 'pointer';
     })
 
     /**
-     * Display popup when capital marker is unhovered
+     * Hide popup when capital marker is unhovered
      * @param {MapEvent} event emited by unhovering on markers
      * @return {void}
      * @private 
      */
-    _hideCapitalInfoPopup = this._swallowNullMapAndPopup(_ => {
+    _hideCapitalInfoPopup = this._swallowNullMapAndPopup(() => {
         this._map.getCanvas().style.cursor = '';
         this._popup.remove();
     })
