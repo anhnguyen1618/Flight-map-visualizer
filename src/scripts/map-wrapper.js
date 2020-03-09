@@ -356,7 +356,7 @@ export class MapWrapper {
 
             this._popup.setLngLat(lngLat.toArray())
                 .setHTML(`
-                <h3>Distance ${feature.properties.otherDestination} - ${this.dataProcessor.selectedCapital}: </h3>
+                <h3>Distance ${feature.properties.origin} - ${feature.properties.destination}: </h3>
                 <p> ${feature.properties.distance} km </p>`)
                 .addTo(this._map);
 
