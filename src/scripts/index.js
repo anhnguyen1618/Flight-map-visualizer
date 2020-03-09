@@ -5,6 +5,7 @@ import { DataProcessor } from './data-processor.js';
 import { MapWrapper } from './map-wrapper.js';
 import { DomHandler } from './dom-handler.js';
 import { CAPITAL_JSON_URL } from './constants.js';
+import { notify } from './utils.js';
 
 import '../styles/index.css';
 
@@ -17,7 +18,7 @@ function runApp() {
 
     mapWrapper.onLoad()
         .then(DomHandler.subscribeAndReactToStyleChanges(styling, mapWrapper))
-        .catch(console.error);
+        .catch(notify);
 }
 
 $(document).ready(() => {
