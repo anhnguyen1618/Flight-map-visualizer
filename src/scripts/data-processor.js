@@ -109,8 +109,8 @@ export class DataProcessor {
         this._nameToInfoMappings = index;
     }
 
-    _computeStraightLineRoutes = origin => {
-        const originInfo = this._nameToInfoMappings[origin];
+    _computeStraightLineRoutes = selectedCapital => {
+        const originInfo = this._nameToInfoMappings[selectedCapital];
         if (!originInfo) {
             return {
                 'type': 'FeatureCollection',
@@ -121,13 +121,13 @@ export class DataProcessor {
         return {
             'type': 'FeatureCollection',
             'features': this._capitalData
-                .filter(({ CapitalName }) => CapitalName !== origin)
+                .filter(({ CapitalName }) => CapitalName !== selectedCapital)
                 .map(({ CapitalName: name, CapitalLongitude: longitude, CapitalLatitude: latitude }, index) => {
                     return {
                         'type': 'Feature',
                         'id': index,
                         'properties': {
-                            origin: name
+                            otherDestination: name
                         },
                         'geometry': {
                             'type': 'LineString',

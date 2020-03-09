@@ -77,6 +77,10 @@ export class Stylings {
         }
     }
 
+    static DEFAULT_LINE_OPACITY = 1;
+    static UN_HIGHLIGHTED_LINE_OPACITY = 0.1;
+    static DEFAULT_LINES_OPACITY_STYLE = ['route', 'line-opacity', Stylings.DEFAULT_LINE_OPACITY]
+
     static CAPITAL_ICON_STYLES = {
         layout: {
             'icon-image': 'airport-11',
@@ -126,5 +130,15 @@ export class Stylings {
             lineWidth: Stylings.LINE_WIDTH[Stylings.DISTANCE_CATEROGY_NAMES.SHORT],
             category
         };
+    }
+
+    static getLineOpacityWithHighLightedCategory(highlightedCategory) {
+        return [
+            'route',
+            'line-opacity',
+            ['case',
+                ["==", ['get', 'category'], highlightedCategory], Stylings.DEFAULT_LINE_OPACITY, Stylings.UN_HIGHLIGHTED_LINE_OPACITY
+            ]
+        ];
     }
 }
