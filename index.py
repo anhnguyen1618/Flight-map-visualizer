@@ -9,6 +9,10 @@ debug = os.getenv('DEVELOPMENT_MODE', False)
 
 app = Flask(__name__)
 
+data = []
+with open("capitals.json") as file: 
+        data = json.load(file)
+
 @app.route("/")
 def index_page():
     return render_template("index.html")
@@ -16,9 +20,7 @@ def index_page():
 
 @app.route("/capitals", methods=["GET"])
 def capitals():
-    with open("capitals.json") as file: 
-        data = json.load(file)
-        return json.dumps(data)
+    return json.dumps(data)
 
 if __name__ == "__main__":
     app.run(debug=debug, port=5000, host="0.0.0.0")

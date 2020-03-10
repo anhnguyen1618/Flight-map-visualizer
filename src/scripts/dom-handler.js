@@ -101,15 +101,15 @@ export class DomHandler {
             `;
         }).join("");
 
-        const header = `<h4 class="title">Min distance (km)</h4>`;
+        const header = `<h4 class="title">Distance (km)</h4>`;
 
         $('#description').html(header + categoryDescription);
     }
 
     /**
      * Listen and react to changes event when different route category is highlighted
-     * @param {*} styling style instance 
-     * @param {*} callBack callback to execute when highlighted category is changed
+     * @param {Stylings} styling style instance 
+     * @param {Function} callBack callback to execute when highlighted category is changed
      */
     static _highlightedRoutesOnChange(styling, callBack) {
         $('#reset-button').hide();
@@ -131,9 +131,9 @@ export class DomHandler {
 
     /**
      * Change theme colors
-     * @param {*} theme name of the selected theme
-     * @param {*} styling style instance
-     * @param {*} mapWrapper map wrapper instance
+     * @param {string} theme name of the selected theme
+     * @param {Stylings} styling style instance
+     * @param {MapWrapper} mapWrapper map wrapper instance
      */
     static _changeTheme(theme, styling, mapWrapper) {
         DomHandler._setThemeColors(theme);
@@ -143,9 +143,9 @@ export class DomHandler {
 
     /**
      * Change highlighted routes
-     * @param {*} category name of the highlighted distance category
-     * @param {*} styling  style instance
-     * @param {*} mapWrapper map wrapper instance
+     * @param {string} category name of the highlighted distance category
+     * @param {Stylings} styling  style instance
+     * @param {MapWrapper} mapWrapper map wrapper instance
      */
     static _changeHighLightedRoutes(category, styling, mapWrapper) {
         styling.highLightedCategory = category;
