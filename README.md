@@ -1,4 +1,4 @@
-# Mapbox's recruitment assignment
+# Flight map visualization
 
 ## Technologies:
 1. [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/) - Library to render map on browser using Web GL
