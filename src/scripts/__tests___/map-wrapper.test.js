@@ -86,24 +86,24 @@ describe('Map wrapper test', () => {
 
     test('test swallow null popup', () => {
         const mockFn = jest.fn();
-        mapWrapper._popup = null;
+        mapWrapper._popupWrapper = null;
         const composedFunc = mapWrapper._swallowNullPopup(mockFn);
         composedFunc("arg1", "arg2", "arg3");
         expect(mockFn).not.toHaveBeenCalled();
 
-        mapWrapper._popup = {};
+        mapWrapper._popupWrapper = {};
         composedFunc("arg1", "arg2", "arg3");
         expect(mockFn).toHaveBeenCalledWith("arg1", "arg2", "arg3");
     });
 
     test('test swallow null map and popup', () => {
         const mockFn = jest.fn();
-        mapWrapper._popup = null;
+        mapWrapper._popupWrapper = null;
         const composedFunc = mapWrapper._swallowNullMapAndPopup(mockFn);
         composedFunc("arg1", "arg2", "arg3");
         expect(mockFn).not.toHaveBeenCalled();
 
-        mapWrapper._popup = {};
+        mapWrapper._popupWrapper = {};
         composedFunc("arg1", "arg2", "arg3");
         expect(mockFn).toHaveBeenCalledWith("arg1", "arg2", "arg3");
 
@@ -272,15 +272,15 @@ describe('Map wrapper test', () => {
 
     test('Test display capital info popup', () => {
         const mockRemove = jest.fn();
-        const mockSetLngLat = jest.fn();
+        const displayMessageAtPosition = jest.fn();
         const mockSetHTML = jest.fn();
         const mockAddTo = jest.fn();
-        mockSetLngLat.mockReturnValue({ setHTML: mockSetHTML });
+        displayMessageAtPosition.mockReturnValue({ setHTML: mockSetHTML });
         mockSetHTML.mockReturnValue({ addTo: mockAddTo });
 
-        mapWrapper._popup = {
+        mapWrapper._popupWrapper = {
             remove: mockRemove,
-            setLngLat: mockSetLngLat
+            displayMessageAtPosition: displayMessageAtPosition
         };
 
         const cursorObj = { cursor: '' };
@@ -306,10 +306,9 @@ describe('Map wrapper test', () => {
             }]
         });
 
-        expect(mockSetLngLat).toHaveBeenCalled();
-        expect(mockSetLngLat.mock.calls[0][0]).toEqual([1, 2]);
-        expect(mockSetHTML).toHaveBeenCalled();
-        expect(mockSetHTML.mock.calls[0][0]).toEqual(`<h3>Helsinki</h3> <p> Capital of Finland </p>`);
+        expect(displayMessageAtPosition).toHaveBeenCalled();
+        expect(displayMessageAtPosition.mock.calls[0][0]).toEqual(`<h3>Helsinki</h3> <p> Capital of Finland </p>`);
+        expect(displayMessageAtPosition.mock.calls[0][1]).toEqual([1, 2]);
         expect(cursorObj.cursor).toBe("pointer");
     });
 
@@ -321,11 +320,11 @@ describe('Map wrapper test', () => {
             })
         };
 
-        mapWrapper._popup.remove = jest.fn();
+        mapWrapper._popupWrapper.remove = jest.fn();
         mapWrapper._hideCapitalInfoPopup();
 
         expect(cursorObj.cursor).toBe("");
-        expect(mapWrapper._popup.remove).toHaveBeenCalled();
+        expect(mapWrapper._popupWrapper.remove).toHaveBeenCalled();
     });
 
     test("test display all flights from chosen capital", () => {

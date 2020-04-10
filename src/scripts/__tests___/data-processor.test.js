@@ -42,8 +42,8 @@ describe('Map wrapper test', () => {
     });
 
     test('test set selected capital', () => {
-        expect(dataProcessor.selectedCapital).toBe("Helsinki");
-        expect(dataProcessor.setSelectedCapital("Helsinki")).toBeFalsy();
+        expect(dataProcessor.selectedCapital).toBe("Riyadh");
+        expect(dataProcessor.setSelectedCapital("Riyadh")).toBeFalsy();
 
         expect(dataProcessor.setSelectedCapital("Berlin")).toBeTruthy();
         expect(dataProcessor.selectedCapital).toBe("Berlin");
@@ -57,7 +57,7 @@ describe('Map wrapper test', () => {
                 'type': 'Feature',
                 'id': 0,
                 'properties': {
-                    origin: "Helsinki",
+                    origin: "Riyadh",
                     destination: "Berlin"
                 },
                 'geometry': {
@@ -76,7 +76,7 @@ describe('Map wrapper test', () => {
 
         const result = dataProcessor.arcLinesFromSelectedCapital;
 
-        expect(mockComputeStraightRoutes).toHaveBeenCalledWith("Helsinki");
+        expect(mockComputeStraightRoutes).toHaveBeenCalledWith("Riyadh");
         expect(dataProcessor._addDistancesAndConvertStraightLineToArc).toHaveBeenCalled();
 
         expect(result).toEqual(routes);

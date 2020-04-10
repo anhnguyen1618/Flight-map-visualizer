@@ -4,4 +4,4 @@ export const DEFAULT_ZOOM_LEVEL = 2;
 export const FLY_TO_ANIMATION_SPEED = 0.4;
 export const CAPITAL_JSON_URL = '/capitals';
 export const NUMBER_OF_POINTS_ALONG_THE_LINE = 500;
-export const DEFAULT_ORIGIN = 'Helsinki';
+export const DEFAULT_ORIGIN = 'Riyadh';

@@ -6,6 +6,7 @@ import {
     FLY_TO_ANIMATION_SPEED
 } from './constants.js';
 import { notify } from './utils.js';
+import { PopupWrapper } from './popup.js';
 
 /**
  * Wrapper around map to encapsulate map manipulation api
@@ -41,10 +42,10 @@ export class MapWrapper {
 
     /**
      * Popup instance
-     * @type {mapboxgl.Popup}
+     * @type {PopupWrapper}
      * @private
      */
-    _popup = null;
+    _popupWrapper = null;
 
     /**
      * Init map instance, load data and render data
@@ -62,7 +63,7 @@ export class MapWrapper {
             zoom: DEFAULT_ZOOM_LEVEL
         });
 
-        this._popup = new mapboxgl.Popup();
+        this._popupWrapper = new PopupWrapper(this._map);
 
         this.loadDataAndRender();
     }
@@ -123,7 +124,7 @@ export class MapWrapper {
      * @private
      */
     _swallowNullPopup = callBack => (...args) => {
-        if (!this._popup) {
+        if (!this._popupWrapper) {
             notify("Popup not found");
             return;
         }
@@ -197,9 +198,8 @@ export class MapWrapper {
         this._map.on('mouseleave', 'capitals', this._hideCapitalInfoPopup);
         this._map.on('click', 'capitals', this._displayAllFlightsFromChosenCapital);
 
-        const { highLightOneSpecificRoute, unHighLightOneSpecificRoute } = this._getRouteHoverHandler();
-        this._map.on('mouseenter', 'route', highLightOneSpecificRoute);
-        this._map.on('mouseleave', 'route', unHighLightOneSpecificRoute);
+        this._map.on('mouseenter', 'route', this._popupWrapper.highLightSpecificRoute);
+        this._map.on('mouseleave', 'route', this._popupWrapper.unHighLightSpecificRoute);
     }
 
     /**
@@ -269,16 +269,14 @@ export class MapWrapper {
      * @private 
      */
     _displayCapitalInfoPopup = this._swallowNullMapAndPopup(({ features }) => {
-
         if (!features.length) {
-            this._popup.remove();
+            this._popupWrapper.remove();
             return;
         }
         const feature = features[0];
 
-        this._popup.setLngLat(feature.geometry.coordinates)
-            .setHTML(`<h3>${feature.properties.capitalName}</h3> <p> ${feature.properties.capitalDescription} </p>`)
-            .addTo(this._map);
+        const message = `<h3>${feature.properties.capitalName}</h3> <p> ${feature.properties.capitalDescription} </p>`;
+        this._popupWrapper.displayMessageAtPosition(message, feature.geometry.coordinates);
 
         this._map.getCanvas().style.cursor = 'pointer';
     })
@@ -291,7 +289,7 @@ export class MapWrapper {
      */
     _hideCapitalInfoPopup = this._swallowNullMapAndPopup(() => {
         this._map.getCanvas().style.cursor = '';
-        this._popup.remove();
+        this._popupWrapper.remove();
     })
 
     /**
@@ -333,54 +331,4 @@ export class MapWrapper {
         const arcs = this.dataProcessor.arcLinesFromSelectedCapital;
         routeSource.setData(arcs);
     })
-
-    /**
-     * Get functions to high light a specific route when that route is hovered.
-     * Since both functions share the same hoverID, we need to wrap them using higher order function to encapsulate hoverId
-     * and make it accessible to only 2 functions
-     * @return {{highLightOneSpecificRoute: Function, unHighLightOneSpecificRoute: Function}}
-     * @private
-     */
-    _getRouteHoverHandler = () => {
-        // This id is used to track which route should be set hover style when it is hovered
-        // as well as unset hover style when it is not hovered anymore
-        let hoverId = null;
-
-        const highLightOneSpecificRoute = this._swallowNullMapAndPopup(({ features, lngLat }) => {
-            if (!features.length) {
-                this._popup.remove();
-                return;
-            }
-            const feature = features[0];
-
-            this._popup.setLngLat(lngLat.toArray())
-                .setHTML(`
-                <h3>Distance ${feature.properties.origin} - ${feature.properties.destination}: </h3>
-                <p> ${feature.properties.distance} km </p>`)
-                .addTo(this._map);
-
-            hoverId = feature.id;
-            this._map.setFeatureState(
-                { source: 'route', id: hoverId },
-                { hover: true }
-            );
-        });
-
-        const unHighLightOneSpecificRoute = this._swallowNullMapAndPopup(() => {
-            if (hoverId !== null) {
-                this._map.getCanvas().style.cursor = '';
-                this._popup.remove();
-                this._map.setFeatureState(
-                    { source: 'route', id: hoverId },
-                    { hover: false }
-                );
-                hoverId = null;
-            }
-        });
-
-        return {
-            highLightOneSpecificRoute,
-            unHighLightOneSpecificRoute
-        };
-    }
 }
