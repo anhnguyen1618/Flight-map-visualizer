@@ -27,7 +27,14 @@ export class MapWrapper {
     dataProcessor = null;
 
     /**
-     * Mark if map is loaded the first time
+     * List of callbacks fired on initial map load
+     * @type {array<Function>}
+     * @private
+     */
+    _initialLoadHandlers = [];
+
+    /**
+     * Flag to mark that map is already loaded once
      * @type {boolean}
      * @private
      */
@@ -74,10 +81,13 @@ export class MapWrapper {
      * @public
      */
     loadDataAndRender() {
-        this.onLoad()
-            .then(this.dataProcessor.load)
-            .then(this._initialRender)
-            .catch(notify);
+        this.addMapInitialLoadHandler(() => {
+            this.dataProcessor.load()
+                .then(this._initialRender)
+                .catch(notify);
+        });
+
+        this._loadMapInitially();
     }
 
     /**
@@ -85,23 +95,30 @@ export class MapWrapper {
      * @returns {Promise<Boolean>} promise to wait for map to be loaded
      * @public
      */
-    onLoad = () => new Promise((resolve, reject) => {
-        if (!this._map) {
-            notify("Map not found");
-            reject(false);
+    addMapInitialLoadHandler = (callBack) => {
+        if (this._isLoaded) {
+            console.warn("Map is already loaded once");
+            return;
+        }
+        this._initialLoadHandlers.push(callBack);
+    }
+
+    _loadMapInitially() {
+        if (this._isLoaded) {
+            console.warn("Map is already loaded once");
             return;
         }
 
-        if (this._isLoaded) {
-            resolve(true);
+        if (!this._map) {
+            notify("Map not found");
             return;
         }
 
         this._map.once('load', () => {
             this._isLoaded = true;
-            resolve(true);
+            this._initialLoadHandlers.forEach(f => f());
         });
-    })
+    }
 
     /**
      * Function decorator that wrap callBack function and check if map is null before calling callBack function  

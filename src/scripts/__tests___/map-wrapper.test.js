@@ -61,14 +61,18 @@ describe('Map wrapper test', () => {
             callBack();
         };
 
-        mapWrapper.onLoad()
-            .then(result => expect(result).toBeTruthy());
+        expect(mapWrapper._isLoaded).toBeFalsy();
+        mapWrapper.addMapInitialLoadHandler(() => {
+            expect(mapWrapper._isLoaded).toBeTruthy();
 
-        expect(mapWrapper._isLoaded).toBeTruthy();
+            mapWrapper._map.once = jest.fn();
+            mapWrapper._loadMapInitially();
+            expect(mapWrapper._map.once).not.toHaveBeenCalled();
+        });
 
-        mapWrapper._map.once = jest.fn();
-        mapWrapper.onLoad().then();
-        expect(mapWrapper._map.once).not.toHaveBeenCalled();
+        mapWrapper._loadMapInitially();
+
+
     });
 
     test('test swallow null map', () => {
